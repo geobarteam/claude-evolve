@@ -1,0 +1,12 @@
+{"type":"queue-operation","operation":"enqueue","timestamp":"2026-09-21T09:00:00.000Z","sessionId":"sess-basic"}
+{"type":"user","uuid":"u1","parentUuid":null,"timestamp":"2026-09-21T09:00:01.000Z","sessionId":"sess-basic","cwd":"D:\\repo","message":{"role":"user","content":"Add a GetDoctorCount method to the doctor client"}}
+{"type":"assistant","uuid":"a1","parentUuid":"u1","timestamp":"2026-09-21T09:00:05.000Z","sessionId":"sess-basic","message":{"role":"assistant","content":[{"type":"thinking","thinking":"private reasoning that must never be extracted"}]}}
+{"type":"assistant","uuid":"a2","parentUuid":"a1","timestamp":"2026-09-21T09:00:06.000Z","sessionId":"sess-basic","message":{"role":"assistant","content":[{"type":"text","text":"I'll read the Refit client first."},{"type":"tool_use","id":"t1","name":"Read","input":{"file_path":"src/Presentation/Shared/ServiceClients/Bff/IDoctorServiceClient.cs"}}]}}
+{"type":"user","uuid":"u2","parentUuid":"a2","timestamp":"2026-09-21T09:00:07.000Z","sessionId":"sess-basic","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t1","content":"public interface IDoctorServiceClient { }"}]},"toolUseResult":{}}
+{"type":"assistant","uuid":"a3","parentUuid":"u2","timestamp":"2026-09-21T09:00:10.000Z","sessionId":"sess-basic","message":{"role":"assistant","content":[{"type":"text","text":"Added the method with a CancellationToken."}]}}
+{"type":"user","uuid":"u3","parentUuid":"a3","timestamp":"2026-09-21T09:02:00.000Z","sessionId":"sess-basic","message":{"role":"user","content":"no, use the existing Get pattern, not a new base call"}}
+{"type":"assistant","uuid":"a4","parentUuid":"u3","timestamp":"2026-09-21T09:02:30.000Z","sessionId":"sess-basic","message":{"role":"assistant","content":[{"type":"text","text":"Reworked to mirror GetDoctors."}]}}
+{"type":"user","uuid":"u4","parentUuid":"a4","timestamp":"2026-09-21T09:04:00.000Z","sessionId":"sess-basic","isMeta":false,"message":{"role":"user","content":[{"type":"text","text":"exactly, like that"}]}}
+this line is not json and must be skipped
+{"type":"user","uuid":"u5","parentUuid":"u4","timestamp":"2026-09-21T09:04:01.000Z","sessionId":"sess-basic","isMeta":true,"message":{"role":"user","content":"<system-reminder>injected, not the owner</system-reminder>"}}
+{"type":"assistant","uuid":"a5","parentUuid":"u4","timestamp":"2026-09-21T09:04:10.000Z","sessionId":"sess-basic","message":{"role":"assistant","content":[{"type":"text","text":"Done."}]}}

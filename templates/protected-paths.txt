@@ -1,0 +1,19 @@
+# Protected manifest — paths the evolver may never change, checked by the genome contract and CI.
+# One repo-relative path or glob per line. '**' matches any depth. Lines starting with '#' are ignored.
+# Project state written by `/evolve:init`. This file protects itself. The plugin root and
+# evolution/evolve.json are protected at runtime as well.
+
+# Evolve configuration and manifests
+evolution/evolve.json
+evolution/evolver/genome-paths.txt
+evolution/evolver/protected-paths.txt
+
+# Session hook wiring and any project-local hooks
+.claude/settings.json
+.claude/hooks/**
+
+# Regression check scripts (deterministic verdicts)
+evolution/regression/tasks/*.check.ps1
+
+# CI
+azure-pipeline-*.yml

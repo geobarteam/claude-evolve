@@ -1,0 +1,13 @@
+{
+  "name": "evolve",
+  "version": "0.1.0",
+  "description": "Self-evolving Claude Code agent: journal + feedback hooks, regression harness, owner-triggered evolver with a genome contract",
+  "author": {
+    "name": "Geoffrey",
+    "email": "geoffrey@digiverse.be"
+  },
+  "homepage": "https://github.com/geobarteam/claude-evolve-plugin",
+  "repository": "https://github.com/geobarteam/claude-evolve-plugin.git",
+  "license": "MIT",
+  "keywords": ["evolve", "genome", "hooks", "pester"]
+}

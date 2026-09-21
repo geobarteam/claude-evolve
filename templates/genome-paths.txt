@@ -1,0 +1,14 @@
+# Genome manifest — the only paths a generation commit may touch.
+# One repo-relative path or glob per line. '**' matches any depth. Lines starting with '#' are ignored.
+# Read by the plugin (Genome.psm1, Get-GenomeManifest). Protected file: the evolver may not edit it.
+
+# Heritable material
+CLAUDE.md
+MEMORY.md
+.claude/agents/**
+.claude/skills/**
+.claude/tools/**
+
+# Generation bookkeeping (allowed in a generation commit, not counted against the edit budget)
+evolution/generations/**
+evolution/lineage.md
