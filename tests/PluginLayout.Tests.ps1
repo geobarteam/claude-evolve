@@ -50,4 +50,13 @@ Describe 'Engine is project-agnostic' {
 
         @($offenders) | Should -BeNullOrEmpty
     }
+
+    It 'Engine_NoScriptHookOrTemplate_HardCodesTheDotnetBuildAllowList' {
+        # The .NET allow-list belongs in a project's evolve.json, never in the engine.
+        $offenders = foreach ($file in Get-EngineFiles -Folders 'scripts', 'hooks', 'templates') {
+            if ((Get-Content $file.FullName -Raw) -match 'dotnet build') { $file.FullName }
+        }
+
+        @($offenders) | Should -BeNullOrEmpty
+    }
 }

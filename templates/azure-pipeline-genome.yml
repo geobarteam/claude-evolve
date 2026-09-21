@@ -1,0 +1,46 @@
+# Genome contract re-check for the self-evolving coding agent (written by /evolve:init -IncludeCi).
+#
+# Standalone pipeline: it does not extend any shared template. On every commit to the main line by the
+# evolver identity it re-runs the same contract checker the evolver used before committing, plus a scan of
+# generation notes for phrases about resisting reverts, preserving memory or bypassing the owner.
+# Owner commits are skipped by the checker itself (-OnlyIfAuthor).
+#
+# Registration in Azure DevOps is the owner's act; this file alone does nothing.
+# TODO: set the pool and the trigger branch for this project; pin PLUGIN_REF to the plugin version you use.
+
+name: genome-contract
+
+pool:
+  name: "TODO-build-pool"
+
+trigger:
+  branches:
+    include:
+      - main   # TODO: the project's main line
+  paths:
+    include:
+      - CLAUDE.md
+      - MEMORY.md
+      - .claude/*
+      - evolution/*
+
+pr: none
+
+variables:
+  PLUGIN_REPO: https://github.com/geobarteam/claude-evolve-plugin.git
+  PLUGIN_REF: v0.1.0
+
+steps:
+  - checkout: self
+    fetchDepth: 2
+    fetchTags: false
+    displayName: Checkout (HEAD and its parent)
+
+  - pwsh: |
+      git clone --quiet --depth 1 --branch "$(PLUGIN_REF)" "$(PLUGIN_REPO)" "$(Agent.TempDirectory)/claude-evolve-plugin"
+    displayName: Fetch the evolve plugin at the pinned version
+
+  - pwsh: |
+      & "$(Agent.TempDirectory)/claude-evolve-plugin/scripts/evolver/Test-GenomeContract.ps1" -RepoPath "$(Build.SourcesDirectory)" -Base HEAD~1 -Head HEAD -OnlyIfAuthor evolver -ScanNotes
+    displayName: Genome contract (evolver commits only)
+    failOnStderr: false
