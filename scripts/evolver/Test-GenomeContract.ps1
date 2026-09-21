@@ -28,7 +28,8 @@ param(
     [string] $Worktree,
     [int] $MaxEdits = 3,
     [string] $OnlyIfAuthor,
-    [switch] $ScanNotes
+    [switch] $ScanNotes,
+    [string] $PluginRoot
 )
 
 $ErrorActionPreference = 'Stop'
@@ -48,6 +49,7 @@ if ($OnlyIfAuthor -and -not $Worktree) {
 
 $params = @{ RepoPath = $RepoPath; Base = $Base; MaxEdits = $MaxEdits }
 if ($Worktree) { $params.Worktree = $Worktree } else { $params.Head = $Head }
+if ($PluginRoot) { $params.PluginRoot = $PluginRoot }
 
 $violations = [System.Collections.Generic.List[string]]::new()
 foreach ($v in @(Test-GenomeContract @params)) { $violations.Add($v) }

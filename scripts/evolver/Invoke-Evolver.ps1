@@ -81,6 +81,7 @@ function Get-GitLine {
 function Copy-ProposalFiles {
     param([string] $Source, [string] $Destination, [string[]] $Paths)
     foreach ($rel in $Paths) {
+        if (-not (Test-PathInsideProject -Path $rel)) { throw "REFUSED: path outside the project root: $rel" }
         $dest = Join-Path $Destination $rel
         New-Item -ItemType Directory -Path (Split-Path $dest -Parent) -Force | Out-Null
         Copy-Item -LiteralPath (Join-Path $Source $rel) -Destination $dest -Force
@@ -157,6 +158,10 @@ function New-EvidenceBundle {
     & $add ''
     & $add '## Protected paths (never edit)'
     & $add (Get-Content -LiteralPath (Join-Path $RepoRoot 'evolution/evolver/protected-paths.txt') -Raw)
+    & $add '# Protected at runtime as well (not listed in the manifest):'
+    & $add 'evolution/evolve.json'
+    & $add "the plugin folder: $(Get-PluginRoot)"
+    & $add ''
     & $add '## MEMORY.md'
     & $add (Get-Content -LiteralPath (Join-Path $RepoRoot 'MEMORY.md') -Raw)
     return $sb.ToString()

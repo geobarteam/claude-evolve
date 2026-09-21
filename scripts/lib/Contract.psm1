@@ -66,6 +66,41 @@ function Get-ManifestAtRef {
     }
 }
 
+function Test-PathInsideProject {
+    <#
+    .SYNOPSIS
+        True when a repo-relative path stays inside the project: not rooted and without a whole '..' segment.
+    #>
+    [CmdletBinding()]
+    param([Parameter(Mandatory)] [string] $Path)
+
+    if ([System.IO.Path]::IsPathRooted($Path) -or $Path -match '^[\\/]') { return $false }
+    $normalized = $Path -replace '\\', '/'
+    return -not ($normalized -match '(^|/)\.\.(/|$)')
+}
+
+function Get-RuntimeProtectedPaths {
+    <#
+    .SYNOPSIS
+        Paths protected regardless of the manifest: the evolve configuration and, when it sits inside the project, the plugin folder.
+    #>
+    [CmdletBinding()]
+    param([Parameter(Mandatory)] [string] $ProjectRoot, [string] $PluginRoot)
+
+    $extra = @('evolution/evolve.json')
+    if ($PluginRoot -and (Test-Path -LiteralPath $PluginRoot) -and (Test-Path -LiteralPath $ProjectRoot)) {
+        $project = (Resolve-Path -LiteralPath $ProjectRoot).Path.TrimEnd('\', '/')
+        $plugin = (Resolve-Path -LiteralPath $PluginRoot).Path.TrimEnd('\', '/')
+        foreach ($separator in '\', '/') {
+            if ($plugin.StartsWith($project + $separator, [System.StringComparison]::OrdinalIgnoreCase)) {
+                $extra += (($plugin.Substring($project.Length + 1) -replace '\\', '/') + '/**')
+                break
+            }
+        }
+    }
+    return @($extra)
+}
+
 function Test-GenomeContract {
     [CmdletBinding()]
     param(
@@ -73,10 +108,13 @@ function Test-GenomeContract {
         [Parameter(Mandatory)] [string] $Base,
         [string] $Head,
         [string] $Worktree,
-        [int] $MaxEdits = 3
+        [int] $MaxEdits = 3,
+        [string] $PluginRoot = (Get-PluginRoot),
+        [string] $ProjectRoot
     )
 
     if (-not $Head -and -not $Worktree) { throw 'Pass -Head <ref> or -Worktree <path>.' }
+    if (-not $ProjectRoot) { $ProjectRoot = $RepoPath }
     $violations = [System.Collections.Generic.List[string]]::new()
 
     if ($Worktree) {
@@ -89,9 +127,13 @@ function Test-GenomeContract {
     $changed = @($changed | ForEach-Object { ($_ -replace '\\', '/').Trim() } | Where-Object { $_ } | Sort-Object -Unique)
 
     $manifest = Get-ManifestAtRef -RepoPath $RepoPath -Ref $Base
+    $protected = @($manifest.Protected) + @(Get-RuntimeProtectedPaths -ProjectRoot $ProjectRoot -PluginRoot $PluginRoot)
 
     foreach ($path in $changed) {
-        if (Test-PathInManifest -Path $path -Manifest $manifest.Protected) {
+        if (-not (Test-PathInsideProject -Path $path)) {
+            $violations.Add("REFUSED: path outside the project root: $path")
+        }
+        elseif (Test-PathInManifest -Path $path -Manifest $protected) {
             $violations.Add("protected path changed: $path")
         }
         elseif (-not (Test-PathInManifest -Path $path -Manifest $manifest.Genome)) {
@@ -109,7 +151,7 @@ function Test-GenomeContract {
         elseif (($baseBlock -replace "`r`n", "`n") -cne ($headBlock -replace "`r`n", "`n")) { $violations.Add('protected block of CLAUDE.md changed') }
     }
 
-    $genomeEdits = @($changed | Where-Object { $_ -notmatch $script:BookkeepingPattern -and (Test-PathInManifest -Path $_ -Manifest $manifest.Genome) -and -not (Test-PathInManifest -Path $_ -Manifest $manifest.Protected) })
+    $genomeEdits = @($changed | Where-Object { $_ -notmatch $script:BookkeepingPattern -and (Test-PathInsideProject -Path $_) -and (Test-PathInManifest -Path $_ -Manifest $manifest.Genome) -and -not (Test-PathInManifest -Path $_ -Manifest $protected) })
     if ($genomeEdits.Count -gt $MaxEdits) {
         $violations.Add("$($genomeEdits.Count) genome edit(s) exceed the budget of ${MaxEdits}: $($genomeEdits -join ', ')")
     }
@@ -343,4 +385,4 @@ function Get-CommitAuthorName {
     return [string] (@(Invoke-ContractGit -RepoPath $RepoPath -GitArgs @('log', '-1', '--format=%an', $Ref)) | Select-Object -First 1)
 }
 
-Export-ModuleMember -Function Test-GenomeContract, Get-GenerationNote, Test-GenerationNote, Set-NoteScore, Get-LineageState, Update-LineageStatus, Add-LineageRow, Compare-Score, Find-FlaggedPhrases, Get-CommitAuthorName
+Export-ModuleMember -Function Test-GenomeContract, Get-GenerationNote, Test-GenerationNote, Set-NoteScore, Get-LineageState, Update-LineageStatus, Add-LineageRow, Compare-Score, Find-FlaggedPhrases, Get-CommitAuthorName, Test-PathInsideProject, Get-RuntimeProtectedPaths

@@ -22,6 +22,8 @@ Look for, in this order of weight:
 
 ## Propose
 
+- Never edit `evolution/evolve.json`, anything under the plugin folder, or any path outside this worktree; the contract refuses such a proposal outright.
+
 - Edit genome files **in place** in this worktree: `CLAUDE.md` outside the protected block, `MEMORY.md`, `.claude/agents/**`, `.claude/skills/**`, `.claude/tools/**`. Create, rewrite or delete files as needed.
 - **At most {{MAX_EDITS}} changed files.** Fewer is better. A change must be specific: a sentence, a rule, a belief, a skill section, not a rewrite of everything.
 - Every change cites at least one journal entry (`evolution/journal/<file>`), feedback record (`evolution/feedback/<file>` plus the signal) or transcript ref (`transcript:<session>#<uuid>`). No change on general opinion alone. If the evidence is thin, propose fewer changes or none.
