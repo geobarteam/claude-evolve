@@ -19,7 +19,7 @@ param(
     [string] $RepoRoot,
     [string] $TranscriptDir,
     [string] $ClaudeCommand = 'claude',
-    [string] $Model = 'haiku',
+    [string] $Model,
     [int] $Days = 2,
     [int] $GitSinceDays = 7,
     [int] $MinSurvivalAgeDays = 7
@@ -31,7 +31,9 @@ Import-Module "$PSScriptRoot/../lib/HookInput.psm1" -Force
 Import-Module "$PSScriptRoot/../lib/Feedback.psm1" -Force
 Import-Module "$PSScriptRoot/../lib/GitSignals.psm1" -Force
 $RepoRoot = Resolve-ProjectRoot -ProjectRoot $RepoRoot
-if (-not $TranscriptDir) { $TranscriptDir = Get-TranscriptDir -ProjectRoot $RepoRoot }
+$config = Get-EvolveConfig -ProjectRoot $RepoRoot
+if (-not $TranscriptDir) { $TranscriptDir = $config.TranscriptDir }
+if (-not $Model) { $Model = $config.Classifier.Model }
 
 $cutoff = [datetime]::UtcNow.AddDays(-$Days)
 $candidates = @()
@@ -65,7 +67,7 @@ foreach ($transcript in $candidates) {
 
 $gitRecords = 0
 try {
-    $gitRecords = Invoke-GitSignals -RepoRoot $RepoRoot -RepoPath $RepoRoot -SinceDays $GitSinceDays -MinSurvivalAgeDays $MinSurvivalAgeDays
+    $gitRecords = Invoke-GitSignals -RepoRoot $RepoRoot -RepoPath $RepoRoot -SinceDays $GitSinceDays -MinSurvivalAgeDays $MinSurvivalAgeDays -TrailerPattern $config.AgentTrailerPattern
 }
 catch {
     Write-HookError -RepoRoot $RepoRoot -Hook 'Collect-DailyFeedback' -Message "git signals: $($_.Exception.Message)"

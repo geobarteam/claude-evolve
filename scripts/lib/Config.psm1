@@ -89,4 +89,67 @@ function Get-TranscriptDir {
     return Join-Path (Join-Path (Join-Path $HOME '.claude') 'projects') (ConvertTo-ClaudeProjectFolderName -Path $ProjectRoot)
 }
 
-Export-ModuleMember -Function Resolve-ProjectRoot, Get-PluginRoot, ConvertTo-ClaudeProjectFolderName, Get-TranscriptDir
+function Get-EvolveConfig {
+    <#
+    .SYNOPSIS
+        The project's evolve settings: evolution/evolve.json merged over the spec defaults.
+    .DESCRIPTION
+        Every key is optional; an absent file, an empty file or an empty string means "default".
+        Unknown keys are ignored. Invalid JSON throws, naming the file.
+    #>
+    [CmdletBinding()]
+    param([Parameter(Mandatory)] [string] $ProjectRoot)
+
+    $path = Join-Path $ProjectRoot 'evolution/evolve.json'
+    $raw = $null
+    $source = 'defaults'
+    if (Test-Path -LiteralPath $path -PathType Leaf) {
+        $text = [System.IO.File]::ReadAllText($path)
+        if (-not [string]::IsNullOrWhiteSpace($text)) {
+            try { $raw = $text | ConvertFrom-Json -Depth 8 }
+            catch { throw "evolution/evolve.json is not valid JSON: $($_.Exception.Message)" }
+        }
+        $source = 'evolution/evolve.json'
+    }
+
+    $leaf = (Split-Path $ProjectRoot -Leaf).ToLowerInvariant()
+    $regression = Get-ConfigValue -Object $raw -Name 'regression' -Default $null
+    $proposal = Get-ConfigValue -Object $raw -Name 'proposal' -Default $null
+    $classifier = Get-ConfigValue -Object $raw -Name 'classifier' -Default $null
+
+    return [pscustomobject]@{
+        EvolverName         = [string] (Get-ConfigValue -Object $raw -Name 'evolverName' -Default 'evolver')
+        EvolverEmail        = [string] (Get-ConfigValue -Object $raw -Name 'evolverEmail' -Default "evolver@$leaf.local")
+        TranscriptDir       = Get-TranscriptDir -ProjectRoot $ProjectRoot -Configured ([string] (Get-ConfigValue -Object $raw -Name 'transcriptDir' -Default ''))
+        MaxEdits            = [int] (Get-ConfigValue -Object $raw -Name 'maxEdits' -Default 3)
+        SettleAfterDays     = [int] (Get-ConfigValue -Object $raw -Name 'settleAfterDays' -Default 14)
+        RetireAfterDays     = [int] (Get-ConfigValue -Object $raw -Name 'retireAfterDays' -Default 30)
+        Regression          = [pscustomobject]@{
+            Model        = [string] (Get-ConfigValue -Object $regression -Name 'model' -Default 'sonnet')
+            AllowedTools = [string] (Get-ConfigValue -Object $regression -Name 'allowedTools' -Default 'Read,Glob,Grep,Edit,Write')
+        }
+        Proposal            = [pscustomobject]@{
+            Model        = [string] (Get-ConfigValue -Object $proposal -Name 'model' -Default 'sonnet')
+            MaxBudgetUsd = [double] (Get-ConfigValue -Object $proposal -Name 'maxBudgetUsd' -Default 3)
+        }
+        Classifier          = [pscustomobject]@{
+            Model = [string] (Get-ConfigValue -Object $classifier -Name 'model' -Default 'haiku')
+        }
+        AgentTrailerPattern = [string] (Get-ConfigValue -Object $raw -Name 'agentTrailerPattern' -Default '^Co-Authored-By:\s*Claude\b')
+        MainLine            = [string] (Get-ConfigValue -Object $raw -Name 'mainLine' -Default '')
+        Source              = $source
+    }
+}
+
+function Get-ConfigValue {
+    # A property of a parsed JSON object, or the default when the object, the property or the value is empty.
+    [CmdletBinding()]
+    param([AllowNull()] $Object, [Parameter(Mandatory)] [string] $Name, [AllowNull()] $Default)
+
+    if ($null -eq $Object -or -not $Object.PSObject.Properties[$Name]) { return $Default }
+    $value = $Object.$Name
+    if ($null -eq $value -or ($value -is [string] -and [string]::IsNullOrWhiteSpace($value))) { return $Default }
+    return $value
+}
+
+Export-ModuleMember -Function Resolve-ProjectRoot, Get-PluginRoot, ConvertTo-ClaudeProjectFolderName, Get-TranscriptDir, Get-EvolveConfig

@@ -1,0 +1,21 @@
+{
+  "evolverName": "evolver",
+  "evolverEmail": "",
+  "transcriptDir": "",
+  "maxEdits": 3,
+  "settleAfterDays": 14,
+  "retireAfterDays": 30,
+  "regression": {
+    "model": "sonnet",
+    "allowedTools": "Read,Glob,Grep,Edit,Write"
+  },
+  "proposal": {
+    "model": "sonnet",
+    "maxBudgetUsd": 3
+  },
+  "classifier": {
+    "model": "haiku"
+  },
+  "agentTrailerPattern": "^Co-Authored-By:\\s*Claude\\b",
+  "mainLine": ""
+}

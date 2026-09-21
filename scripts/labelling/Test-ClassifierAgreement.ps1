@@ -16,7 +16,7 @@ param(
     [string] $RepoRoot,
     [string] $TranscriptDir,
     [string] $ClaudeCommand = 'claude',
-    [string] $Model = 'haiku'
+    [string] $Model
 )
 
 $ErrorActionPreference = 'Stop'
@@ -24,7 +24,9 @@ Import-Module "$PSScriptRoot/../lib/Config.psm1" -Force
 Import-Module "$PSScriptRoot/../lib/Transcript.psm1" -Force
 Import-Module "$PSScriptRoot/../lib/Feedback.psm1" -Force
 $RepoRoot = Resolve-ProjectRoot -ProjectRoot $RepoRoot
-if (-not $TranscriptDir) { $TranscriptDir = Get-TranscriptDir -ProjectRoot $RepoRoot }
+$config = Get-EvolveConfig -ProjectRoot $RepoRoot
+if (-not $TranscriptDir) { $TranscriptDir = $config.TranscriptDir }
+if (-not $Model) { $Model = $config.Classifier.Model }
 
 $labelDir = Join-Path $RepoRoot 'evolution/labelled'
 $labelFiles = @(Get-ChildItem -LiteralPath $labelDir -Filter '*.labels.jsonl' -File -ErrorAction SilentlyContinue)

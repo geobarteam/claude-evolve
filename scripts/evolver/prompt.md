@@ -16,7 +16,7 @@ Look for, in this order of weight:
 - **Questions whose answer existed**: a missing or unread belief in `MEMORY.md`.
 - **Abandoned sessions**: what was the agent doing at the end?
 - **Praise**: what to keep and make explicit.
-- **Retirement**: skills, sub-agents and beliefs with no usage record and no corroboration for 30 days are candidates to remove. The genome must be able to shrink.
+- **Retirement**: skills, sub-agents and beliefs with no usage record and no corroboration for {{RETIRE_AFTER_DAYS}} days are candidates to remove. The genome must be able to shrink.
 - **Owner edits to genome files** in the git log are settled truth; never undo them.
 - **Reverted generations** (`reverted` rows in the lineage): treat every change of that generation as rejected; do not re-propose it.
 
@@ -40,7 +40,7 @@ Change 1: <title>
 Change 2: ...
 
 Retired:
-- <skill/tool/belief> — <why, e.g. unused for 30 days>   (or: nothing)
+- <skill/tool/belief> — <why, e.g. unused for {{RETIRE_AFTER_DAYS}} days>   (or: nothing)
 
 Declined to change:
 - <thing the evidence pointed at but the budget, the protected section or weak evidence prevents>   (or: nothing)

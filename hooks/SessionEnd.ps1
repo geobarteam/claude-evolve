@@ -16,10 +16,11 @@ param(
     [string] $InputJson,
     [string] $RepoRoot,
     [string] $ClaudeCommand = 'claude',
-    [string] $Model = 'haiku'
+    [string] $Model
 )
 
 $ErrorActionPreference = 'Stop'
+Import-Module "$PSScriptRoot/../scripts/lib/Config.psm1" -Force
 Import-Module "$PSScriptRoot/../scripts/lib/HookInput.psm1" -Force
 Import-Module "$PSScriptRoot/../scripts/lib/Feedback.psm1" -Force
 
@@ -29,6 +30,7 @@ $root = $null
 try {
     $hookInput = Read-HookInput -InputJson $InputJson
     $root = Resolve-RepoRoot -RepoRoot $RepoRoot -HookInput $hookInput
+    if (-not $Model) { $Model = (Get-EvolveConfig -ProjectRoot $root).Classifier.Model }
     $sessionId = [string] (Get-HookProperty -Object $hookInput -Name 'session_id' -Default '')
     $transcriptPath = [string] (Get-HookProperty -Object $hookInput -Name 'transcript_path' -Default '')
 

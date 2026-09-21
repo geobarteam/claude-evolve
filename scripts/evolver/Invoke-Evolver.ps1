@@ -26,11 +26,11 @@ param(
     [string] $RepoRoot,
     [string] $ProposalDir,
     [string] $ClaudeCommand = 'claude',
-    [string] $Model = 'sonnet',
+    [string] $Model,
     [string] $TasksDir,
-    [int] $MaxEdits = 3,
-    [double] $MaxBudgetUsd = 3.0,
-    [int] $SettleAfterDays = 14,
+    [int] $MaxEdits,
+    [double] $MaxBudgetUsd,
+    [int] $SettleAfterDays,
     [switch] $SkipRegression,
     [switch] $Force
 )
@@ -43,8 +43,14 @@ Import-Module "$PSScriptRoot/../lib/Feedback.psm1" -Force
 Import-Module "$PSScriptRoot/../lib/GitSignals.psm1" -Force
 $RepoRoot = Resolve-ProjectRoot -ProjectRoot $RepoRoot
 
-$script:EvolverName = 'evolver'
-$script:EvolverEmail = 'evolver@' + (Split-Path $RepoRoot -Leaf).ToLowerInvariant() + '.local'
+$config = Get-EvolveConfig -ProjectRoot $RepoRoot
+if (-not $PSBoundParameters.ContainsKey('Model')) { $Model = $config.Proposal.Model }
+if (-not $PSBoundParameters.ContainsKey('MaxEdits')) { $MaxEdits = $config.MaxEdits }
+if (-not $PSBoundParameters.ContainsKey('MaxBudgetUsd')) { $MaxBudgetUsd = $config.Proposal.MaxBudgetUsd }
+if (-not $PSBoundParameters.ContainsKey('SettleAfterDays')) { $SettleAfterDays = $config.SettleAfterDays }
+$regressionModel = if ($PSBoundParameters.ContainsKey('Model')) { $Model } else { $config.Regression.Model }
+$script:EvolverName = $config.EvolverName
+$script:EvolverEmail = $config.EvolverEmail
 $regressionScript = "$PSScriptRoot/../regression/Invoke-Regression.ps1"
 $promptPath = Join-Path $PSScriptRoot 'prompt.md'
 if (-not $TasksDir) { $TasksDir = Join-Path $RepoRoot 'evolution/regression/tasks' }
@@ -83,7 +89,7 @@ function Copy-ProposalFiles {
 
 function Get-RegressionScore {
     param([string] $Ref)
-    $output = & $regressionScript -RepoRoot $RepoRoot -Ref $Ref -ClaudeCommand $ClaudeCommand -Model $Model -TasksDir $TasksDir 2>&1 | ForEach-Object { [string] $_ }
+    $output = & $regressionScript -RepoRoot $RepoRoot -Ref $Ref -ClaudeCommand $ClaudeCommand -Model $regressionModel -TasksDir $TasksDir 2>&1 | ForEach-Object { [string] $_ }
     foreach ($line in $output) { Write-Host "    $line"; Add-Content -LiteralPath $logPath -Value "    $line" -Encoding utf8 }
     $scoreLine = $output | Where-Object { $_ -match '^Score: (\d+/\d+)' } | Select-Object -Last 1
     if (-not $scoreLine) { throw 'Regression run produced no score.' }
@@ -138,7 +144,7 @@ function New-EvidenceBundle {
     if ($genomeLog.Count -eq 0) { & $add '(none)' } else { $genomeLog | ForEach-Object { & $add "- $_" } }
     & $add ''
     & $add '## Agent-authored commits in the last 30 days'
-    $agentCommits = @(Get-AgentCommits -RepoPath $RepoRoot -SinceDays 30)
+    $agentCommits = @(Get-AgentCommits -RepoPath $RepoRoot -SinceDays 30 -TrailerPattern $config.AgentTrailerPattern)
     if ($agentCommits.Count -eq 0) { & $add '(none)' } else { $agentCommits | ForEach-Object { & $add "- $($_.Sha.Substring(0, 12)) $($_.Subject)" } }
     & $add ''
     & $add '## Genome inventory'
@@ -160,7 +166,7 @@ function New-EvidenceBundle {
 $branch = Get-GitLine -Path $RepoRoot -GitArgs @('symbolic-ref', '--short', '-q', 'HEAD')
 if (-not $branch) { throw 'The repository is in detached HEAD state; check out the main line first.' }
 $lineagePath = Join-Path $RepoRoot 'evolution/lineage.md'
-Write-Log "Evolver run $stamp on branch '$branch' (log: evolution/.state/evolver/$stamp.log)"
+Write-Log "Evolver run $stamp on branch '$branch' (mainLine: $(if ($config.MainLine) { $config.MainLine } else { 'unset' }); log: evolution/.state/evolver/$stamp.log)"
 
 $lineageDirty = @(Invoke-EvolverGit -Path $RepoRoot -GitArgs @('status', '--porcelain', '--', 'evolution/lineage.md')).Count -gt 0
 $bookkeeping = [System.Collections.Generic.List[string]]::new()
@@ -217,7 +223,7 @@ if (-not $ProposalDir) {
     [System.IO.File]::WriteAllText($evidencePath, $evidence, [System.Text.UTF8Encoding]::new($false))
     Write-Log "Evidence: $($journals.Count) journal entry/entries since $($since.ToString('u')); bundle at evolution/.state/evolver/$stamp-evidence.md"
 
-    $prompt = [System.IO.File]::ReadAllText($promptPath).Replace('{{GENERATION}}', "$generation").Replace('{{PREVIOUS_SCORE}}', $lineage.LastScore).Replace('{{MAX_EDITS}}', "$MaxEdits").Replace('{{EVIDENCE_PATH}}', '.evolver/evidence.md')
+    $prompt = [System.IO.File]::ReadAllText($promptPath).Replace('{{GENERATION}}', "$generation").Replace('{{PREVIOUS_SCORE}}', $lineage.LastScore).Replace('{{MAX_EDITS}}', "$MaxEdits").Replace('{{RETIRE_AFTER_DAYS}}', "$($config.RetireAfterDays)").Replace('{{EVIDENCE_PATH}}', '.evolver/evidence.md')
     $command = Resolve-ClaudeCommand -ClaudeCommand $ClaudeCommand
     $worktree = $null
     $previousGuard = $env:EVOLUTION_CLASSIFIER

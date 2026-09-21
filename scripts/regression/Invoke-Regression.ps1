@@ -22,9 +22,9 @@ param(
     [string] $RepoRoot,
     [string] $TasksDir,
     [string] $ClaudeCommand = 'claude',
-    [string] $Model = 'sonnet',
+    [string] $Model,
     [string] $PermissionMode = 'bypassPermissions',
-    [string] $AllowedTools = 'Read,Glob,Grep,Edit,Write',
+    [string] $AllowedTools,
     [double] $MaxBudgetUsd = 1.0,
     [string[]] $Only = @(),
     [switch] $KeepWorktree
@@ -36,6 +36,9 @@ Import-Module "$PSScriptRoot/../lib/Feedback.psm1" -Force
 Import-Module "$PSScriptRoot/../lib/Regression.psm1" -Force
 $RepoRoot = Resolve-ProjectRoot -ProjectRoot $RepoRoot
 if (-not $TasksDir) { $TasksDir = Join-Path $RepoRoot 'evolution/regression/tasks' }
+$config = Get-EvolveConfig -ProjectRoot $RepoRoot
+if (-not $Model) { $Model = $config.Regression.Model }
+if (-not $AllowedTools) { $AllowedTools = $config.Regression.AllowedTools }
 
 function Invoke-RepoGit {
     param([string] $Path, [string[]] $GitArgs)

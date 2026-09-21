@@ -23,7 +23,7 @@ Set-StrictMode -Version Latest
 Import-Module (Join-Path $PSScriptRoot 'Config.psm1')
 Import-Module (Join-Path $PSScriptRoot 'Feedback.psm1')
 
-$script:AgentTrailerPattern = '(?im)^Co-Authored-By:\s*Claude\b'
+$script:AgentTrailerPattern = '^Co-Authored-By:\s*Claude\b'   # '(?im)' is applied at match time; override per call with -TrailerPattern (evolve.json agentTrailerPattern)
 $script:FieldSeparator = [char] 0x1f
 $script:RecordSeparator = [char] 0x1e
 
@@ -62,7 +62,8 @@ function Get-Commits {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)] [string] $RepoPath,
-        [int] $SinceDays = 7
+        [int] $SinceDays = 7,
+        [string] $TrailerPattern = $script:AgentTrailerPattern
     )
 
     $format = '%H' + $script:FieldSeparator + '%P' + $script:FieldSeparator + '%an' + $script:FieldSeparator + '%cI' + $script:FieldSeparator + '%s' + $script:FieldSeparator + '%b' + $script:RecordSeparator
@@ -82,7 +83,7 @@ function Get-Commits {
             Date      = [datetime]::Parse($fields[3].Trim(), [cultureinfo]::InvariantCulture, [System.Globalization.DateTimeStyles]::AdjustToUniversal)
             Subject   = $fields[4].Trim()
             Body      = $body
-            IsAgent   = ($body -match $script:AgentTrailerPattern)
+            IsAgent   = ($body -match ('(?im)' + $TrailerPattern))
         }
     }
 
@@ -93,10 +94,11 @@ function Get-AgentCommits {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)] [string] $RepoPath,
-        [int] $SinceDays = 7
+        [int] $SinceDays = 7,
+        [string] $TrailerPattern = $script:AgentTrailerPattern
     )
 
-    return @(Get-Commits -RepoPath $RepoPath -SinceDays $SinceDays | Where-Object IsAgent)
+    return @(Get-Commits -RepoPath $RepoPath -SinceDays $SinceDays -TrailerPattern $TrailerPattern | Where-Object IsAgent)
 }
 
 function Get-AgentLineOverlaps {
@@ -191,10 +193,11 @@ function Get-CodeCorrections {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)] [string] $RepoPath,
-        [int] $SinceDays = 7
+        [int] $SinceDays = 7,
+        [string] $TrailerPattern = $script:AgentTrailerPattern
     )
 
-    $commits = @(Get-Commits -RepoPath $RepoPath -SinceDays $SinceDays)
+    $commits = @(Get-Commits -RepoPath $RepoPath -SinceDays $SinceDays -TrailerPattern $TrailerPattern)
     $agentShas = @{}
     foreach ($c in $commits | Where-Object IsAgent) { $agentShas[$c.Sha] = $c }
     if ($agentShas.Count -eq 0) { return @() }
@@ -229,10 +232,11 @@ function Get-BugAttributions {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)] [string] $RepoPath,
-        [int] $SinceDays = 7
+        [int] $SinceDays = 7,
+        [string] $TrailerPattern = $script:AgentTrailerPattern
     )
 
-    $commits = @(Get-Commits -RepoPath $RepoPath -SinceDays $SinceDays)
+    $commits = @(Get-Commits -RepoPath $RepoPath -SinceDays $SinceDays -TrailerPattern $TrailerPattern)
     $agentShas = @{}
     foreach ($c in $commits | Where-Object IsAgent) { $agentShas[$c.Sha] = $c }
     if ($agentShas.Count -eq 0) { return @() }
@@ -261,11 +265,12 @@ function Get-DiffSurvival {
     param(
         [Parameter(Mandatory)] [string] $RepoPath,
         [int] $MinAgeDays = 7,
-        [int] $WindowDays = 60
+        [int] $WindowDays = 60,
+        [string] $TrailerPattern = $script:AgentTrailerPattern
     )
 
     $cutoff = [datetime]::UtcNow.AddDays(-$MinAgeDays)
-    $agents = @(Get-AgentCommits -RepoPath $RepoPath -SinceDays $WindowDays | Where-Object { $_.Date -le $cutoff })
+    $agents = @(Get-AgentCommits -RepoPath $RepoPath -SinceDays $WindowDays -TrailerPattern $TrailerPattern | Where-Object { $_.Date -le $cutoff })
 
     $signals = foreach ($commit in $agents) {
         $added = 0
@@ -362,7 +367,8 @@ function Invoke-GitSignals {
         [Parameter(Mandatory)] [string] $RepoRoot,
         [string] $RepoPath = $RepoRoot,
         [int] $SinceDays = 7,
-        [int] $MinSurvivalAgeDays = 7
+        [int] $MinSurvivalAgeDays = 7,
+        [string] $TrailerPattern = $script:AgentTrailerPattern
     )
 
     if (-not (Test-GitRepository -RepoPath $RepoPath)) { return 0 }
@@ -374,11 +380,11 @@ function Invoke-GitSignals {
     }
 
     $signals = @()
-    $signals += @(Get-CodeCorrections -RepoPath $RepoPath -SinceDays $SinceDays)
-    $signals += @(Get-BugAttributions -RepoPath $RepoPath -SinceDays $SinceDays)
+    $signals += @(Get-CodeCorrections -RepoPath $RepoPath -SinceDays $SinceDays -TrailerPattern $TrailerPattern)
+    $signals += @(Get-BugAttributions -RepoPath $RepoPath -SinceDays $SinceDays -TrailerPattern $TrailerPattern)
     $signals += @(Get-CommitMarkers -RepoPath $RepoPath -SinceDays $SinceDays)
     $signals += @(Get-GenerationReverts -RepoPath $RepoPath -SinceDays $SinceDays)
-    $signals += @(Get-DiffSurvival -RepoPath $RepoPath -MinAgeDays $MinSurvivalAgeDays)
+    $signals += @(Get-DiffSurvival -RepoPath $RepoPath -MinAgeDays $MinSurvivalAgeDays -TrailerPattern $TrailerPattern)
 
     $written = 0
     foreach ($signal in $signals) {
