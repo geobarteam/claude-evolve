@@ -14,6 +14,9 @@ Set-StrictMode -Version Latest
 # would garble every non-ASCII character the engine reads back from them.
 if ([Console]::OutputEncoding.CodePage -ne 65001) { [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false) }
 
+# Errors inside module functions must surface to the caller's try/catch (hooks log them and exit 0).
+$ErrorActionPreference = 'Stop'
+
 function Resolve-ProjectRoot {
     <#
     .SYNOPSIS

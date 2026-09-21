@@ -15,6 +15,9 @@ Set-StrictMode -Version Latest
 $script:ProtectedStart = '<!-- PROTECTED -->'
 $script:ProtectedEnd = '<!-- /PROTECTED -->'
 
+# Errors inside module functions must surface to the caller's try/catch (hooks log them and exit 0).
+$ErrorActionPreference = 'Stop'
+
 function Get-GenomeManifest {
     <#
     .SYNOPSIS

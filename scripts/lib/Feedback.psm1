@@ -22,6 +22,9 @@ $script:Labels = @('correction', 'frustration', 'praise', 'question', 'none')
 $script:Weights = @{ frustration = 2; abandonment = 2; correction = 1; praise = 1; question = 1; none = 0 }
 $script:MaxActionLength = 600
 
+# Errors inside module functions must surface to the caller's try/catch (hooks log them and exit 0).
+$ErrorActionPreference = 'Stop'
+
 function Write-FeedbackRecord {
     <#
     .SYNOPSIS

@@ -11,6 +11,9 @@
 
 Set-StrictMode -Version Latest
 
+# Errors inside module functions must surface to the caller's try/catch (hooks log them and exit 0).
+$ErrorActionPreference = 'Stop'
+
 function Read-HookInput {
     <#
     .SYNOPSIS
@@ -41,22 +44,21 @@ function Read-HookInput {
 function Resolve-RepoRoot {
     <#
     .SYNOPSIS
-        Repo root precedence: explicit -RepoRoot, CLAUDE_PROJECT_DIR, the hook input's cwd, then the fallback.
+        Project root precedence: explicit -RepoRoot, CLAUDE_PROJECT_DIR, the hook input's cwd. Never the plugin folder.
     #>
     [CmdletBinding()]
     param(
         [AllowNull()] [AllowEmptyString()] [string] $RepoRoot,
-        [AllowNull()] $HookInput,
-        [Parameter(Mandatory)] [string] $Fallback
+        [AllowNull()] $HookInput
     )
 
-    foreach ($candidate in @($RepoRoot, $env:CLAUDE_PROJECT_DIR, (Get-HookProperty -Object $HookInput -Name 'cwd'), $Fallback)) {
+    foreach ($candidate in @($RepoRoot, $env:CLAUDE_PROJECT_DIR, (Get-HookProperty -Object $HookInput -Name 'cwd'))) {
         if (-not [string]::IsNullOrWhiteSpace($candidate) -and (Test-Path -LiteralPath $candidate)) {
             return (Resolve-Path -LiteralPath $candidate).Path
         }
     }
 
-    throw 'Unable to resolve the repository root for the hook.'
+    throw 'Unable to resolve the project root for the hook.'
 }
 
 function Get-HookProperty {

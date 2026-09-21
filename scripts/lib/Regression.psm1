@@ -19,6 +19,9 @@
 
 Set-StrictMode -Version Latest
 
+# Errors inside module functions must surface to the caller's try/catch (hooks log them and exit 0).
+$ErrorActionPreference = 'Stop'
+
 function Get-RegressionTasks {
     [CmdletBinding()]
     param([Parameter(Mandatory)] [string] $TasksDir)

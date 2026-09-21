@@ -31,6 +31,9 @@ Import-Module (Join-Path $PSScriptRoot 'Genome.psm1')
 $script:EvidencePattern = 'evolution/journal/\S+|evolution/feedback/\S+|transcript:\S+'
 $script:BookkeepingPattern = '^(evolution/generations/[^/]+\.md|evolution/lineage\.md)$'
 
+# Errors inside module functions must surface to the caller's try/catch (hooks log them and exit 0).
+$ErrorActionPreference = 'Stop'
+
 function Invoke-ContractGit {
     param([string] $RepoPath, [string[]] $GitArgs, [switch] $AllowFailure)
     $out = & git -C $RepoPath -c core.quotepath=false @GitArgs 2>&1

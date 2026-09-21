@@ -27,6 +27,9 @@ $script:AgentTrailerPattern = '(?im)^Co-Authored-By:\s*Claude\b'
 $script:FieldSeparator = [char] 0x1f
 $script:RecordSeparator = [char] 0x1e
 
+# Errors inside module functions must surface to the caller's try/catch (hooks log them and exit 0).
+$ErrorActionPreference = 'Stop'
+
 function Invoke-Git {
     [CmdletBinding()]
     param(
