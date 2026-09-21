@@ -34,6 +34,8 @@ $RepoRoot = Resolve-ProjectRoot -ProjectRoot $RepoRoot
 $config = Get-EvolveConfig -ProjectRoot $RepoRoot
 if (-not $TranscriptDir) { $TranscriptDir = $config.TranscriptDir }
 if (-not $Model) { $Model = $config.Classifier.Model }
+$transcriptSource = if ($TranscriptDir -eq (Get-TranscriptDir -ProjectRoot $RepoRoot)) { 'derived' } else { 'configured' }
+Write-Output "Transcripts: $TranscriptDir ($transcriptSource)"
 
 $cutoff = [datetime]::UtcNow.AddDays(-$Days)
 $candidates = @()
