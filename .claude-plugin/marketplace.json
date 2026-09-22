@@ -1,6 +1,5 @@
 {
   "name": "claude-evolve-plugin",
-  "description": "Marketplace for the evolve plugin: a self-evolving Claude Code agent with journal and feedback hooks, a regression harness and an owner-triggered evolver bound by a genome contract.",
   "owner": {
     "name": "Geoffrey",
     "email": "geoffrey@digiverse.be"
