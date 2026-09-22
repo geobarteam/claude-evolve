@@ -13,7 +13,7 @@ BeforeAll {
 
     function Get-Records {
         param([string] $Root)
-        $dir = Join-Path $Root 'evolution\feedback'
+        $dir = Join-Path $Root 'evolution/feedback'
         if (-not (Test-Path $dir)) { return @() }
         @(Get-ChildItem $dir -Filter '*.jsonl' | Get-Content | ForEach-Object { $_ | ConvertFrom-Json })
     }

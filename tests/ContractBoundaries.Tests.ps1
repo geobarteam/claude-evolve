@@ -31,7 +31,7 @@ Describe 'Test-PathInsideProject' {
 
     It 'TestPathInsideProject_ParentSegment_False' {
         Test-PathInsideProject -Path '../escape.md' | Should -BeFalse
-        Test-PathInsideProject -Path '..\escape.md' | Should -BeFalse
+        Test-PathInsideProject -Path ('..' + [char] 92 + 'escape.md') | Should -BeFalse -Because 'a Windows-style parent segment escapes too'
         Test-PathInsideProject -Path 'a/../../escape.md' | Should -BeFalse
         Test-PathInsideProject -Path 'a/..' | Should -BeFalse
     }

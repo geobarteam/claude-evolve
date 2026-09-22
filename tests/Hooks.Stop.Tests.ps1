@@ -9,9 +9,9 @@ BeforeAll {
 
     function New-FakeRepo {
         param([string] $Root)
-        New-Item -ItemType Directory -Path (Join-Path $Root 'evolution\journal') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $Root 'evolution/journal') -Force | Out-Null
         New-Item -ItemType Directory -Path (Join-Path $Root 'evolution\.state') -Force | Out-Null
-        Set-Content -Path (Join-Path $Root 'evolution\journal\TEMPLATE.md') -Value '<!-- session: {{session_id}} -->'
+        Set-Content -Path (Join-Path $Root 'evolution/journal/TEMPLATE.md') -Value '<!-- session: {{session_id}} -->'
         Copy-Item $script:Fixture (Join-Path $Root 'transcript.jsonl')
     }
 

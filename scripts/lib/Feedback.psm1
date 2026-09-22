@@ -237,7 +237,7 @@ function Resolve-ClaudeCommand {
     <#
     .SYNOPSIS
         Picks a runnable Claude CLI. Precedence: explicit path or non-default name, $env:CLAUDE_CLI, then the first
-        `claude.exe` application on PATH (skipping the npm .ps1/.cmd shims, which are broken on this machine), then 'claude'.
+        `claude` application on PATH (on Windows only `claude.exe`: the npm shims may be broken), then 'claude'.
     #>
     [CmdletBinding()]
     param([string] $ClaudeCommand = 'claude')
@@ -245,10 +245,13 @@ function Resolve-ClaudeCommand {
     if ($ClaudeCommand -ne 'claude') { return $ClaudeCommand }
     if ($env:CLAUDE_CLI -and (Test-Path -LiteralPath $env:CLAUDE_CLI)) { return $env:CLAUDE_CLI }
 
-    $exe = Get-Command claude -All -CommandType Application -ErrorAction SilentlyContinue |
-        Where-Object { $_.Source -like '*.exe' } |
-        Select-Object -First 1
-    if ($exe) { return $exe.Source }
+    $candidates = @(Get-Command claude -All -CommandType Application -ErrorAction SilentlyContinue)
+    if ($IsWindows) {
+        # Prefer claude.exe: the npm .ps1/.cmd shims on Windows may point at a missing binary.
+        $candidates = @($candidates | Where-Object { $_.Source -like '*.exe' })
+    }
+    $found = $candidates | Select-Object -First 1
+    if ($found) { return $found.Source }
 
     return 'claude'
 }

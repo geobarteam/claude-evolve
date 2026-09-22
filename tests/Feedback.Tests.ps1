@@ -35,7 +35,7 @@ Describe 'Write-FeedbackRecord' {
         Write-FeedbackRecord -RepoRoot $root -SessionId 's1' -Signal 'praise' -Value 'exactly, like that' -Reason 'approves' -Ref 'transcript:s1#u4'
         Write-FeedbackRecord -RepoRoot $root -SessionId 's1' -Signal 'correction' -Value 'no, use Refit' -Ref 'transcript:s1#u2'
 
-        $files = @(Get-ChildItem (Join-Path $root 'evolution\feedback') -Filter '*.jsonl')
+        $files = @(Get-ChildItem (Join-Path $root 'evolution/feedback') -Filter '*.jsonl')
         $files.Count | Should -Be 1
         $files[0].Name | Should -Match '^\d{4}-\d{2}-\d{2}\.jsonl$'
         $lines = @(Get-Content $files[0].FullName)

@@ -67,7 +67,7 @@ BeforeAll {
 
     function Get-Records {
         param([string] $Root)
-        $dir = Join-Path $Root 'evolution\feedback'
+        $dir = Join-Path $Root 'evolution/feedback'
         if (-not (Test-Path $dir)) { return @() }
         @(Get-ChildItem $dir -Filter '*.jsonl' | Get-Content | ForEach-Object { $_ | ConvertFrom-Json })
     }
@@ -183,8 +183,8 @@ Describe 'Invoke-GitSignals and daily collection' {
     }
 
     It 'CollectDaily_RunsGitSignals_WritesCommitMarkerRecord' {
-        New-Item -ItemType Directory -Path (Join-Path $script:Root 'evolution\evolver') -Force | Out-Null
-        Copy-Item (Join-Path $script:PluginRoot 'scripts/evolver/rubric.md') (Join-Path $script:Root 'evolution\evolver\rubric.md')
+        New-Item -ItemType Directory -Path (Join-Path $script:Root 'evolution/evolver') -Force | Out-Null
+        Copy-Item (Join-Path $script:PluginRoot 'scripts/evolver/rubric.md') (Join-Path $script:Root 'evolution/evolver/rubric.md')
         $emptyTranscripts = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
         New-Item -ItemType Directory -Path $emptyTranscripts -Force | Out-Null
 

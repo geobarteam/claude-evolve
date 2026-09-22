@@ -67,7 +67,7 @@ Describe 'Get-GenomeManifest' {
 
         Test-PathInManifest -Path 'CLAUDE.md' -Manifest $manifest | Should -BeTrue
         Test-PathInManifest -Path '.claude/skills/refit/SKILL.md' -Manifest $manifest | Should -BeTrue
-        Test-PathInManifest -Path '.claude\skills\refit\SKILL.md' -Manifest $manifest | Should -BeTrue
+        Test-PathInManifest -Path '.claude/skills/refit/SKILL.md' -Manifest $manifest | Should -BeTrue
         Test-PathInManifest -Path 'evolution/lineage.md' -Manifest $manifest | Should -BeTrue
         Test-PathInManifest -Path '.claude/hooks/Stop.ps1' -Manifest $manifest | Should -BeFalse
         Test-PathInManifest -Path 'src/Host/Cfe/Program.cs' -Manifest $manifest | Should -BeFalse

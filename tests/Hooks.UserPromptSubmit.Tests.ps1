@@ -6,8 +6,8 @@ BeforeAll {
 
     function New-FakeRepo {
         param([string] $Root)
-        New-Item -ItemType Directory -Path (Join-Path $Root 'evolution\journal') -Force | Out-Null
-        Set-Content -Path (Join-Path $Root 'evolution\journal\2026-09-21-1300.md') -Value "<!-- session: sess-rate -->`n## Task`nx"
+        New-Item -ItemType Directory -Path (Join-Path $Root 'evolution/journal') -Force | Out-Null
+        Set-Content -Path (Join-Path $Root 'evolution/journal/2026-09-21-1300.md') -Value "<!-- session: sess-rate -->`n## Task`nx"
     }
 
     function Invoke-Hook {
@@ -19,7 +19,7 @@ BeforeAll {
 
     function Get-Records {
         param([string] $Root)
-        $dir = Join-Path $Root 'evolution\feedback'
+        $dir = Join-Path $Root 'evolution/feedback'
         if (-not (Test-Path $dir)) { return @() }
         @(Get-ChildItem $dir -Filter '*.jsonl' | Get-Content | ForEach-Object { $_ | ConvertFrom-Json })
     }
@@ -85,7 +85,7 @@ Describe 'UserPromptSubmit hook' {
     }
 
     It 'UserPromptSubmit_NoJournalYet_RefersToTranscript' {
-        Remove-Item (Join-Path $script:Root 'evolution\journal\2026-09-21-1300.md')
+        Remove-Item (Join-Path $script:Root 'evolution/journal/2026-09-21-1300.md')
 
         Invoke-Hook -Root $script:Root -Prompt '+' | Out-Null
 

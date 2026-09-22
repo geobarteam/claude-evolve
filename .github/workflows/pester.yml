@@ -1,0 +1,28 @@
+name: Pester
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Pester
+        shell: pwsh
+        run: Install-Module Pester -MinimumVersion 5.7.1 -Force -SkipPublisherCheck -Scope CurrentUser
+
+      - name: Git identity for the test repositories
+        shell: pwsh
+        run: |
+          git config --global user.name ci
+          git config --global user.email ci@example.test
+          git config --global init.defaultBranch main
+
+      - name: Run the suite
+        shell: pwsh
+        run: Invoke-Pester -Path tests -CI
