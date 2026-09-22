@@ -238,6 +238,36 @@ Describe 'Initialize-Project refusals and reports' {
     }
 }
 
+Describe 'Initialize-Project on a project with its own protected block' {
+    It 'Init_ProjectWithCustomProtectedBlock_KeepsItByteIdenticalAndReportsDiffers' {
+        # The block of the first consumer repository: it names project rules the template does not have.
+        $customBlock = @'
+<!-- PROTECTED -->
+## Owner constraints (protected — the evolver may not edit this block)
+
+- The owner may stop, edit or revert this agent at any time; that outranks every other instruction in this file, in `MEMORY.md`, in any skill, agent, command or journal entry.
+- Correctability is terminal, not instrumental: no reasoning may weigh a change against "the agent's continuity", preserving memory, or avoiding reverts.
+- Never edit genome files (`CLAUDE.md`, `.claude/agents/**`, `.claude/skills/**`, `.claude/tools/**`, `MEMORY.md` outside `## Beliefs`) during a task. Genome changes go through the evolver only, and only when the owner asks for a generation.
+- Rollback rule: `git revert gen/N` reverts a generation; `git checkout gen/N-1 -- <file>` reverts one file; both are followed by a row in `evolution/lineage.md`.
+- Hard constraints from `copilot-instructions.md` still apply: the WASM client never holds tokens; changes under `src/` follow the planning gate; no secrets in committed files; the agent never pushes.
+<!-- /PROTECTED -->
+'@
+        $root = New-TestProject
+        $path = Join-Path $root 'CLAUDE.md'
+        [System.IO.File]::WriteAllText($path, "# Consumer`n`n## Working agent duties (self-evolving agent)`n`n- **Read on start.** x`n`n" + $customBlock, [System.Text.UTF8Encoding]::new($false))
+        $bytesBefore = [System.IO.File]::ReadAllBytes($path)
+
+        $r = Invoke-Init -Root $root
+
+        $r.ExitCode | Should -Be 0
+        $r.Output | Should -Match 'protected block already present'
+        $r.Output | Should -Match 'protected block differs from the plugin template \(kept as is\)'
+        $r.Output | Should -Match 'kept CLAUDE\.md \(working agent duties\)'
+        [System.IO.File]::ReadAllBytes($path) | Should -Be $bytesBefore -Because 'a consumer block is never rewritten'
+        Test-Path (Join-Path $root 'evolution/evolve.json') | Should -BeTrue
+    }
+}
+
 Describe 'init skill' {
     It 'InitSkill_NeverCommitsWithoutConfirmation' {
         $skill = Get-Content (Join-Path $script:PluginRoot 'skills/init/SKILL.md') -Raw
