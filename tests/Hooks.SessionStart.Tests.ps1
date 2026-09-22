@@ -6,9 +6,9 @@ BeforeAll {
 
     function New-FakeRepo {
         param([string] $Root)
-        New-Item -ItemType Directory -Path (Join-Path $Root 'evolution\journal') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $Root 'evolution/journal') -Force | Out-Null
         Set-Content -Path (Join-Path $Root 'MEMORY.md') -Value "# MEMORY`n`n## Beliefs`n`n- belief-one"
-        Set-Content -Path (Join-Path $Root 'evolution\journal\TEMPLATE.md') -Value '<!-- session: {{session_id}} -->'
+        Set-Content -Path (Join-Path $Root 'evolution/journal/TEMPLATE.md') -Value '<!-- session: {{session_id}} -->'
         foreach ($name in '2026-09-17-0900', '2026-09-18-0900', '2026-09-19-0900', '2026-09-20-0900') {
             Set-Content -Path (Join-Path $Root "evolution\journal\$name.md") -Value "<!-- session: s-$name -->`n## Task`njournal $name"
         }
@@ -70,7 +70,7 @@ Describe 'SessionStart hook' {
     }
 
     It 'SessionStart_NoJournalsYet_StillPrintsMemory' {
-        Get-ChildItem (Join-Path $script:Root 'evolution\journal') -Filter '2026-*.md' | Remove-Item
+        Get-ChildItem (Join-Path $script:Root 'evolution/journal') -Filter '2026-*.md' | Remove-Item
         $out = Invoke-Hook -Root $script:Root -HookInput @{ session_id = 'sess-4'; source = 'resume'; hook_event_name = 'SessionStart'; cwd = $script:Root }
 
         $out | Should -Match 'belief-one'

@@ -9,7 +9,7 @@ BeforeAll {
 
     function New-FakeRepo {
         param([string] $Root)
-        New-Item -ItemType Directory -Path (Join-Path $Root 'evolution\journal') -Force | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $Root 'evolution/journal') -Force | Out-Null
         Set-Content -Path (Join-Path $Root 'MEMORY.md') -Value "# MEMORY`n`n## Beliefs`n`n- **Belief A** (since: gen/0). text"
         Copy-Item $script:Fixture (Join-Path $Root 'transcript.jsonl')
     }
@@ -18,7 +18,7 @@ BeforeAll {
         param([string] $Root, [string] $SessionId, [string] $Outcome)
         $body = "<!-- session: $SessionId -->`n## Task`nx`n"
         if ($null -ne $Outcome) { $body += "## Outcome`n$Outcome`n" }
-        Set-Content -Path (Join-Path $Root 'evolution\journal\2026-09-21-1200.md') -Value $body
+        Set-Content -Path (Join-Path $Root 'evolution/journal/2026-09-21-1200.md') -Value $body
     }
 
     function Invoke-Hook {
@@ -30,7 +30,7 @@ BeforeAll {
 
     function Get-Records {
         param([string] $Root)
-        $dir = Join-Path $Root 'evolution\feedback'
+        $dir = Join-Path $Root 'evolution/feedback'
         if (-not (Test-Path $dir)) { return @() }
         @(Get-ChildItem $dir -Filter '*.jsonl' | Get-Content | ForEach-Object { $_ | ConvertFrom-Json })
     }
