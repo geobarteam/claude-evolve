@@ -23,7 +23,7 @@ feedback, generations, lineage, manifests, regression tasks and `evolution/evolv
 In a Claude Code session:
 
 ```
-/plugin marketplace add geobarteam/claude-evolve-plugin
+/plugin marketplace add geobarteam/claude-evolve
 /plugin install evolve@claude-evolve-plugin
 ```
 
@@ -34,7 +34,7 @@ team, commit the install in the project's `.claude/settings.json`:
 {
   "enabledPlugins": { "evolve@claude-evolve-plugin": true },
   "extraKnownMarketplaces": {
-    "claude-evolve-plugin": { "source": { "source": "github", "repo": "geobarteam/claude-evolve-plugin" } }
+    "claude-evolve-plugin": { "source": { "source": "github", "repo": "geobarteam/claude-evolve" } }
   }
 }
 ```
@@ -207,8 +207,8 @@ instruction. Upgrading the plugin never rewrites a project's protected block: wh
 ## Developing the plugin
 
 ```powershell
-git clone https://github.com/geobarteam/claude-evolve-plugin.git
-claude --plugin-dir ./claude-evolve-plugin          # loads it in place, hooks included, for any project you open
+git clone https://github.com/geobarteam/claude-evolve.git
+claude --plugin-dir ./claude-evolve                 # loads it in place, hooks included, for any project you open
 pwsh -NoProfile -Command "Invoke-Pester -Path tests -Output Detailed"
 ```
 

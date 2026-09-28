@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "evolve",
-      "description": "Self-evolving Claude Code agent: journal + feedback hooks, regression harness, owner-triggered evolver with a genome contract. Run /evolve:init in a project to start.",
+      "description": "Self-evolving Claude Code agent: short- and long-term memory with recall-based forgetting, journal + feedback hooks, regression harness, owner-triggered evolver with a genome contract. Run /evolve:init in a project to start.",
       "author": {
         "name": "Geoffrey",
         "email": "geoffrey@digiverse.be"

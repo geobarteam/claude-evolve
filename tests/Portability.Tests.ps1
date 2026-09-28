@@ -85,7 +85,7 @@ Describe 'Distribution' {
 
     It 'ReadmeInstallSection_NamesMarketplaceAndPluginAndConfigKeys' {
         $readme = Get-Content (Join-Path $script:PluginRoot 'README.md') -Raw
-        $readme | Should -Match '/plugin marketplace add geobarteam/claude-evolve-plugin'
+        $readme | Should -Match '/plugin marketplace add geobarteam/claude-evolve'
         $readme | Should -Match '/plugin install evolve@claude-evolve-plugin'
         $readme | Should -Match '/evolve:init'
         $readme | Should -Match 'pwsh'

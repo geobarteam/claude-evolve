@@ -27,8 +27,8 @@ trigger:
 pr: none
 
 variables:
-  PLUGIN_REPO: https://github.com/geobarteam/claude-evolve-plugin.git
-  PLUGIN_REF: v0.1.0
+  PLUGIN_REPO: https://github.com/geobarteam/claude-evolve.git
+  PLUGIN_REF: v0.2.0
 
 steps:
   - checkout: self
