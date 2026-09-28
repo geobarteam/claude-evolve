@@ -22,6 +22,8 @@ param(
 $ErrorActionPreference = 'Stop'
 Import-Module "$PSScriptRoot/../scripts/lib/HookInput.psm1" -Force
 Import-Module "$PSScriptRoot/../scripts/lib/Transcript.psm1" -Force
+Import-Module "$PSScriptRoot/../scripts/lib/Config.psm1" -Force
+Import-Module "$PSScriptRoot/../scripts/lib/Memory.psm1" -Force
 
 function Write-Block {
     param([Parameter(Mandatory)] [string] $Reason)
@@ -47,7 +49,7 @@ try {
         $name = Get-JournalFileName -RepoRoot $root -SessionId $sessionId
         Write-Block -Reason ("No journal entry exists for session $sessionId. Create evolution/journal/$name from evolution/journal/TEMPLATE.md: " +
             "first line exactly '$marker', then fill Task, Outcome (done | partial | abandoned), What worked, What I fought against, " +
-            "What I wished I had, Beliefs to revise. Then finish your turn.")
+            "What I wished I had, Memory. Then finish your turn.")
         exit 0
     }
 
@@ -59,8 +61,19 @@ try {
 
     if ($lastUser -and $journal.LastWriteTimeUtc -lt $lastUser) {
         Write-Block -Reason ("The journal evolution/journal/$($journal.Name) for session $sessionId is older than the owner's last prompt. " +
-            "Update it so it reflects this turn (Outcome, What worked, What I fought against, What I wished I had, Beliefs to revise), then finish your turn.")
+            "Update it so it reflects this turn (Outcome, What worked, What I fought against, What I wished I had, Memory), then finish your turn.")
         exit 0
+    }
+
+    $shortTerm = Join-Path $root (Get-MemoryLayout).ShortTerm
+    if (Test-Path -LiteralPath $shortTerm) {
+        $limits = (Get-EvolveConfig -ProjectRoot $root).Memory
+        $size = Measure-MemoryText -Text ([System.IO.File]::ReadAllText($shortTerm))
+        if ($size.Lines -gt $limits.MaxLines -or $size.Bytes -gt $limits.MaxBytes) {
+            Write-Block -Reason ("memory/short-term.md is $($size.Lines) lines / $($size.Bytes) bytes, over its limit of $($limits.MaxLines) lines / $($limits.MaxBytes) bytes. " +
+                "Compress it like working memory: merge duplicates, drop what no longer matters, keep one short bullet per fact. Then finish your turn.")
+            exit 0
+        }
     }
 
     exit 0

@@ -11,11 +11,17 @@
       - `provisional` rows older than 14 days become `settled`.
       - Bookkeeping rows are committed on their own as "lineage: ..." by the evolver identity.
     Run mode (no -ProposalDir):
-      1. Stop when no journal entry is newer than the last generation (use -Force to override).
-      2. Build the evidence bundle under evolution/.state/evolver/ and in the worktree at .evolver/evidence.md.
-      3. `claude -p` with evolution/evolver/prompt.md inside a disposable worktree at HEAD: EVOLUTION_CLASSIFIER=1
+      1. Stop when no journal entry is newer than the last generation and short-term memory is empty (-Force overrides).
+      2. Memory consolidation, step 1 (deterministic, in a disposable worktree at HEAD holding the owner's current
+         memory/short-term.md): the recalls since the last generation strengthen the long-term memories that were
+         read, the others decay, idle weak ones are forgotten (scripts/lib/Memory.psm1, Invoke-MemoryDecay).
+      3. Build the evidence bundle under evolution/.state/evolver/ and in the worktree at .evolver/evidence.md.
+      4. `claude -p` with evolution/evolver/prompt.md inside that worktree: EVOLUTION_CLASSIFIER=1
          (this project's hooks stay silent), permission mode acceptEdits, tools Read/Glob/Grep/Write/Edit only, a budget cap.
-      4. The worktree's changes become the proposal; the run then continues exactly like -ProposalDir mode.
+         The model compresses short-term into long-term memory (step 2) and proposes the genome edits.
+      5. Memory consolidation, step 3 (deterministic): counters for new memories, the weakest memories forgotten while
+         the index is over its limit, short-term memory cleared. Recalls and forgetting are appended to the note.
+      6. The worktree's changes become the proposal; the run then continues exactly like -ProposalDir mode.
     Proposal mode (-ProposalDir): the commit contract of Step 7:
       contract check in a fresh worktree -> regression score -> drop the last change and retry once if the score fell ->
       commit only the proposed paths + note + lineage as "evolver <evolver@<project>.local>", tag gen/N.
@@ -41,6 +47,7 @@ Import-Module "$PSScriptRoot/../lib/Contract.psm1" -Force
 Import-Module "$PSScriptRoot/../lib/Worktree.psm1" -Force
 Import-Module "$PSScriptRoot/../lib/Feedback.psm1" -Force
 Import-Module "$PSScriptRoot/../lib/GitSignals.psm1" -Force
+Import-Module "$PSScriptRoot/../lib/Memory.psm1" -Force
 $RepoRoot = Resolve-ProjectRoot -ProjectRoot $RepoRoot
 
 $config = Get-EvolveConfig -ProjectRoot $RepoRoot
@@ -55,6 +62,7 @@ $regressionScript = "$PSScriptRoot/../regression/Invoke-Regression.ps1"
 $promptPath = Join-Path $PSScriptRoot 'prompt.md'
 if (-not $TasksDir) { $TasksDir = Join-Path $RepoRoot 'evolution/regression/tasks' }
 $stamp = [datetime]::UtcNow.ToString('yyyyMMdd-HHmmss')
+$shortTermSnapshot = $null
 $stateDir = Join-Path $RepoRoot 'evolution/.state/evolver'
 if (-not (Test-Path -LiteralPath $stateDir)) { New-Item -ItemType Directory -Path $stateDir -Force | Out-Null }
 $logPath = Join-Path $stateDir "$stamp.log"
@@ -78,11 +86,18 @@ function Get-GitLine {
     [string] (@(Invoke-EvolverGit -Path $Path -GitArgs $GitArgs) | Select-Object -First 1)
 }
 
+# A proposal folder lists the files it deletes (a forgotten memory, a retired skill) in this file, one path per line.
+$script:DeletedList = '.deleted'
+
 function Copy-ProposalFiles {
     param([string] $Source, [string] $Destination, [string[]] $Paths)
     foreach ($rel in $Paths) {
         if (-not (Test-PathInsideProject -Path $rel)) { throw "REFUSED: path outside the project root: $rel" }
         $dest = Join-Path $Destination $rel
+        if (-not (Test-Path -LiteralPath (Join-Path $Source $rel))) {
+            if (Test-Path -LiteralPath $dest) { Remove-Item -LiteralPath $dest -Force }
+            continue
+        }
         New-Item -ItemType Directory -Path (Split-Path $dest -Parent) -Force | Out-Null
         Copy-Item -LiteralPath (Join-Path $Source $rel) -Destination $dest -Force
     }
@@ -108,7 +123,7 @@ function Get-LastGenerationTime {
 }
 
 function New-EvidenceBundle {
-    param([datetime] $Since, [int] $Generation, [string[]] $Journals)
+    param([datetime] $Since, [int] $Generation, [string[]] $Journals, [string] $MemoryReport)
     $sb = [System.Text.StringBuilder]::new()
     $add = { param($t) [void] $sb.AppendLine($t) }
     & $add "# Evidence for gen/$Generation (since $($Since.ToString('u')))"
@@ -130,6 +145,7 @@ function New-EvidenceBundle {
             foreach ($line in Get-Content -LiteralPath $f.FullName) {
                 if ([string]::IsNullOrWhiteSpace($line)) { continue }
                 try { $rec = $line | ConvertFrom-Json } catch { continue }
+                if ($rec.signal -eq 'recall') { continue }
                 if ($rec.signal -eq 'usage') { $usage[[string] $rec.value] = 1 + $(if ($usage.ContainsKey([string] $rec.value)) { $usage[[string] $rec.value] } else { 0 }); continue }
                 & $add "- $line"
             }
@@ -141,7 +157,7 @@ function New-EvidenceBundle {
     foreach ($k in $usage.Keys | Sort-Object) { & $add "- $k : $($usage[$k])" }
     & $add ''
     & $add '## Git history of genome paths since the last generation (owner edits are settled truth)'
-    $genomeLog = @(& git -C $RepoRoot log "--since=$($Since.ToString('o'))" '--format=%h %an: %s' -- CLAUDE.md MEMORY.md .claude/agents .claude/skills .claude/tools 2>&1 | ForEach-Object { [string] $_ })
+    $genomeLog = @(& git -C $RepoRoot log "--since=$($Since.ToString('o'))" '--format=%h %an: %s' -- CLAUDE.md memory .claude/agents .claude/skills .claude/tools 2>&1 | ForEach-Object { [string] $_ })
     if ($genomeLog.Count -eq 0) { & $add '(none)' } else { $genomeLog | ForEach-Object { & $add "- $_" } }
     & $add ''
     & $add '## Agent-authored commits in the last 30 days'
@@ -162,8 +178,7 @@ function New-EvidenceBundle {
     & $add 'evolution/evolve.json'
     & $add "the plugin folder: $(Get-PluginRoot)"
     & $add ''
-    & $add '## MEMORY.md'
-    & $add (Get-Content -LiteralPath (Join-Path $RepoRoot 'MEMORY.md') -Raw)
+    & $add $MemoryReport
     return $sb.ToString()
 }
 
@@ -218,15 +233,11 @@ if (-not $ProposalDir) {
     if (Test-Path -LiteralPath $journalDir) {
         $journals = @(Get-ChildItem -LiteralPath $journalDir -Filter '*.md' -File | Where-Object { $_.Name -ne 'TEMPLATE.md' -and $_.LastWriteTimeUtc -gt $threshold } | Sort-Object Name | ForEach-Object FullName)
     }
-    if ($journals.Count -eq 0 -and -not $Force) {
-        Write-Log "There is no journal entry newer than gen/$($lineage.LastGeneration) ($($since.ToString('u'))); nothing to evolve. Use -Force to run anyway."
+    $shortTermEmpty = Test-ShortTermEmpty -RepoRoot $RepoRoot
+    if ($journals.Count -eq 0 -and $shortTermEmpty -and -not $Force) {
+        Write-Log "There is no journal entry newer than gen/$($lineage.LastGeneration) ($($since.ToString('u'))) and short-term memory is empty; nothing to evolve. Use -Force to run anyway."
         exit 0
     }
-
-    $evidence = New-EvidenceBundle -Since $since -Generation $generation -Journals $journals
-    $evidencePath = Join-Path $stateDir "$stamp-evidence.md"
-    [System.IO.File]::WriteAllText($evidencePath, $evidence, [System.Text.UTF8Encoding]::new($false))
-    Write-Log "Evidence: $($journals.Count) journal entry/entries since $($since.ToString('u')); bundle at evolution/.state/evolver/$stamp-evidence.md"
 
     $prompt = [System.IO.File]::ReadAllText($promptPath).Replace('{{GENERATION}}', "$generation").Replace('{{PREVIOUS_SCORE}}', $lineage.LastScore).Replace('{{MAX_EDITS}}', "$MaxEdits").Replace('{{RETIRE_AFTER_DAYS}}', "$($config.RetireAfterDays)").Replace('{{EVIDENCE_PATH}}', '.evolver/evidence.md')
     $command = Resolve-ClaudeCommand -ClaudeCommand $ClaudeCommand
@@ -235,6 +246,42 @@ if (-not $ProposalDir) {
     try {
         $worktree = New-DisposableWorktree -RepoPath $RepoRoot -Ref $baseSha -Prefix 'evolve-evolver-propose'
         New-Item -ItemType Directory -Path (Join-Path $worktree '.evolver') -Force | Out-Null
+
+        # Consolidation step 1: the owner's current short-term memory, then recall counting, decay and idle forgetting.
+        $layout = Get-MemoryLayout
+        $shortTermSource = Join-Path $RepoRoot $layout.ShortTerm
+        if (Test-Path -LiteralPath $shortTermSource) {
+            New-Item -ItemType Directory -Path (Split-Path (Join-Path $worktree $layout.ShortTerm) -Parent) -Force | Out-Null
+            Copy-Item -LiteralPath $shortTermSource -Destination (Join-Path $worktree $layout.ShortTerm) -Force
+            $shortTermSnapshot = [System.IO.File]::ReadAllText($shortTermSource)
+        }
+        $recalls = Get-RecallCounts -RepoRoot $RepoRoot -Since $since
+        $decay = Invoke-MemoryDecay -Root $worktree -Recalls $recalls -Limits $config.Memory
+        $existingLinks = @(Get-LongTermIndex -RepoRoot $worktree | ForEach-Object Link)
+        Write-Log "Memory: $($decay.Recalled.Count) memory/memories recalled, $($decay.Decayed) decayed, $($decay.Forgotten.Count) forgotten (idle); short-term memory $(if ($shortTermEmpty) { 'empty' } else { 'to consolidate' })."
+
+        $report = [System.Text.StringBuilder]::new()
+        [void] $report.AppendLine('## Memory')
+        [void] $report.AppendLine("Limits: $($config.Memory.MaxLines) lines / $($config.Memory.MaxBytes) bytes per memory file; decay $($config.Memory.Decay) per cycle; forgotten after $($config.Memory.ForgetAfterCycles) idle cycle(s) below strength $($config.Memory.ForgetBelow).")
+        [void] $report.AppendLine()
+        [void] $report.AppendLine('### Recalled since the last generation (reads of memory/long-term/*.md; counters already updated)')
+        if ($decay.Recalled.Count -eq 0) { [void] $report.AppendLine('(none)') }
+        foreach ($r in $decay.Recalled) { [void] $report.AppendLine("- $($r.Link) x$($r.Count), strength $($r.Strength)") }
+        [void] $report.AppendLine()
+        [void] $report.AppendLine('### Forgotten by decay in this cycle (already removed)')
+        if ($decay.Forgotten.Count -eq 0) { [void] $report.AppendLine('(none)') }
+        foreach ($f in $decay.Forgotten) { [void] $report.AppendLine("- $($f.Link): $($f.Reason)") }
+        [void] $report.AppendLine()
+        foreach ($rel in $layout.ShortTerm, $layout.LongTermIndex) {
+            $path = Join-Path $worktree $rel
+            [void] $report.AppendLine("### $rel")
+            [void] $report.AppendLine($(if (Test-Path -LiteralPath $path) { [System.IO.File]::ReadAllText($path) } else { '(missing)' }))
+        }
+
+        $evidence = New-EvidenceBundle -Since $since -Generation $generation -Journals $journals -MemoryReport $report.ToString()
+        $evidencePath = Join-Path $stateDir "$stamp-evidence.md"
+        [System.IO.File]::WriteAllText($evidencePath, $evidence, [System.Text.UTF8Encoding]::new($false))
+        Write-Log "Evidence: $($journals.Count) journal entry/entries since $($since.ToString('u')); bundle at evolution/.state/evolver/$stamp-evidence.md"
         [System.IO.File]::WriteAllText((Join-Path $worktree '.evolver/evidence.md'), $evidence, [System.Text.UTF8Encoding]::new($false))
 
         Write-Log "Asking $Model for a proposal in $worktree (budget $MaxBudgetUsd USD)"
@@ -258,8 +305,35 @@ if (-not $ProposalDir) {
         }
         Write-Log "Model: $($reply.Trim().Split("`n")[0])"
 
+        # Consolidation step 3: counters for new memories, capacity forgetting, short-term memory cleared.
+        $shortTermTemplate = [System.IO.File]::ReadAllText((Join-Path (Get-PluginRoot) 'templates/memory-short-term.md'))
+        $completion = Complete-MemoryConsolidation -Root $worktree -Limits $config.Memory -ShortTermTemplate $shortTermTemplate -ExistingLinks $existingLinks
+        $forgotten = @($decay.Forgotten) + @($completion.Forgotten)
+        Write-Log "Memory: $($completion.New.Count) new long-term memory/memories, $($completion.Forgotten.Count) forgotten for capacity; short-term memory cleared."
+        $noteFile = Join-Path $worktree $noteRel
+        $memoryChanged = (@(Invoke-EvolverGit -Path $worktree -GitArgs @('status', '--porcelain', '--', 'memory')).Count -gt 0) -or -not $shortTermEmpty
+        if ($memoryChanged) {
+            $noteBody = if (Test-Path -LiteralPath $noteFile) { [System.IO.File]::ReadAllText($noteFile).TrimEnd() } else { "# gen/$generation — memory consolidation`n`nScore: pending" }
+            $lines = [System.Collections.Generic.List[string]]::new()
+            $lines.Add('')
+            $lines.Add('Recalled:')
+            if ($decay.Recalled.Count -eq 0) { $lines.Add('- nothing') }
+            foreach ($r in $decay.Recalled) { $lines.Add("- $($r.Link) x$($r.Count) (strength $($r.Strength))") }
+            $lines.Add('')
+            $lines.Add('Forgotten:')
+            if ($forgotten.Count -eq 0) { $lines.Add('- nothing') }
+            foreach ($f in $forgotten) { $lines.Add("- $($f.Link) — $($f.Reason)") }
+            New-Item -ItemType Directory -Path (Split-Path $noteFile -Parent) -Force | Out-Null
+            [System.IO.File]::WriteAllText($noteFile, ($noteBody + "`n" + ($lines -join "`n") + "`n"), [System.Text.UTF8Encoding]::new($false))
+        }
+
         $changed = @(Invoke-EvolverGit -Path $worktree -GitArgs @('diff', '--name-only')) +
         @(Invoke-EvolverGit -Path $worktree -GitArgs @('ls-files', '--others', '--exclude-standard'))
+        # Short-term memory is cleared against the owner's working copy, which may hold notes HEAD does not have.
+        $shortTermWorktree = Join-Path $worktree (Get-MemoryLayout).ShortTerm
+        if ($null -ne $shortTermSnapshot -and (Test-Path -LiteralPath $shortTermWorktree) -and [System.IO.File]::ReadAllText($shortTermWorktree) -cne $shortTermSnapshot) {
+            $changed += (Get-MemoryLayout).ShortTerm
+        }
         $changed = @($changed | ForEach-Object { ($_ -replace '\\', '/').Trim() } | Where-Object { $_ -and $_ -notlike '.evolver/*' } | Sort-Object -Unique)
         if ($changed.Count -eq 0) {
             Write-Log 'The evolver proposed no change; nothing to commit.'
@@ -268,6 +342,8 @@ if (-not $ProposalDir) {
         $ProposalDir = Join-Path $stateDir "$stamp-proposal"
         New-Item -ItemType Directory -Path $ProposalDir -Force | Out-Null
         Copy-ProposalFiles -Source $worktree -Destination $ProposalDir -Paths $changed
+        $deletedPaths = @($changed | Where-Object { -not (Test-Path -LiteralPath (Join-Path $worktree $_)) })
+        if ($deletedPaths.Count -gt 0) { [System.IO.File]::WriteAllText((Join-Path $ProposalDir $script:DeletedList), (($deletedPaths -join "`n") + "`n"), [System.Text.UTF8Encoding]::new($false)) }
         Write-Log "Proposal captured: $($changed -join ', ')"
     }
     finally {
@@ -283,15 +359,26 @@ if (-not (Test-Path -LiteralPath $notePath)) {
     exit 1
 }
 
-$proposalPaths = @(Get-ChildItem -LiteralPath $ProposalDir -Recurse -File | ForEach-Object {
-        $_.FullName.Substring($ProposalDir.Length).TrimStart('\', '/') -replace '\\', '/'
-    } | Sort-Object)
+$deletedListPath = Join-Path $ProposalDir $script:DeletedList
+$deletedPaths = @()
+if (Test-Path -LiteralPath $deletedListPath) {
+    $deletedPaths = @([System.IO.File]::ReadAllLines($deletedListPath) | ForEach-Object { ($_ -replace '\\', '/').Trim() } | Where-Object { $_ })
+}
+$proposalPaths = @(@(Get-ChildItem -LiteralPath $ProposalDir -Recurse -File | ForEach-Object {
+            $_.FullName.Substring($ProposalDir.Length).TrimStart('\', '/') -replace '\\', '/'
+        } | Where-Object { $_ -ne $script:DeletedList }) + $deletedPaths | Sort-Object -Unique)
 $noteText = [System.IO.File]::ReadAllText($notePath)
 $note = Get-GenerationNote -Text $noteText
 $summary = if ($note.Summary) { $note.Summary } else { "generation $generation" }
 Write-Log "Proposal for gen/$generation on branch '$branch' at $($baseSha.Substring(0, 12)): $($proposalPaths.Count) file(s), $($note.Changes.Count) change(s); previous score $($lineage.LastScore)."
 
 $dirty = @(Invoke-EvolverGit -Path $RepoRoot -GitArgs (@('status', '--porcelain', '--') + $proposalPaths + @('evolution/lineage.md')))
+# The owner's uncommitted short-term memory is what this run consolidated; it may be replaced if it did not change meanwhile.
+$shortTermRel = (Get-MemoryLayout).ShortTerm
+$shortTermNow = Join-Path $RepoRoot $shortTermRel
+if ($null -ne $shortTermSnapshot -and (Test-Path -LiteralPath $shortTermNow) -and [System.IO.File]::ReadAllText($shortTermNow) -ceq $shortTermSnapshot) {
+    $dirty = @($dirty | Where-Object { ($_.Substring([math]::Min(3, $_.Length)).Trim('"') -replace '\\', '/') -ne $shortTermRel })
+}
 if ($dirty.Count -gt 0) {
     Write-Log 'REFUSED: the owner has uncommitted changes to proposed paths; commit or stash them first:'
     $dirty | ForEach-Object { Write-Log "  $_" }

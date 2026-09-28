@@ -7,7 +7,9 @@ BeforeAll {
     function New-FakeRepo {
         param([string] $Root)
         New-Item -ItemType Directory -Path (Join-Path $Root 'evolution/journal') -Force | Out-Null
-        Set-Content -Path (Join-Path $Root 'MEMORY.md') -Value "# MEMORY`n`n## Beliefs`n`n- belief-one"
+        New-Item -ItemType Directory -Path (Join-Path $Root 'memory') -Force | Out-Null
+        Set-Content -Path (Join-Path $Root 'memory/long-term.md') -Value "# Long-term memory`n`n- [Belief one](long-term/belief-one.md) — belief-one"
+        Set-Content -Path (Join-Path $Root 'memory/short-term.md') -Value "# Short-term memory`n`n- 2026-09-20 short-note-one"
         Set-Content -Path (Join-Path $Root 'evolution/journal/TEMPLATE.md') -Value '<!-- session: {{session_id}} -->'
         foreach ($name in '2026-09-17-0900', '2026-09-18-0900', '2026-09-19-0900', '2026-09-20-0900') {
             Set-Content -Path (Join-Path $Root "evolution\journal\$name.md") -Value "<!-- session: s-$name -->`n## Task`njournal $name"
@@ -36,7 +38,8 @@ Describe 'SessionStart hook' {
         $out | Should -Match 'journal 2026-09-18-0900'
         $out | Should -Not -Match 'journal 2026-09-17-0900'
         $out | Should -Not -Match '\{\{session_id\}\}'
-        $out | Should -Match 'Journal duty'
+        $out | Should -Match 'Journal and memory duty'
+        $out | Should -Match 'short-note-one'
         $out | Should -Match 'sess-1'
     }
 

@@ -9,7 +9,7 @@ You are given numbered pairs. Each pair is one prompt the owner typed (`OWNER`) 
 | `correction` | The owner redirects, refuses or fixes what the agent just did or proposed. | "no, …", "not like that", "use X instead", "stop", "undo that", "that's wrong" |
 | `frustration` | The owner repeats an instruction they already gave, escalates tone, or signals impatience. Outranks `correction` when both apply. | "again", "I already said", "how many times", profanity, ALL CAPS, very short negative replies ("no.", "wrong.") |
 | `praise` | The owner approves the agent's last action or result. | "good", "exactly", "perfect", "yes, like that", "nice" |
-| `question` | The owner is answering a clarifying question the agent asked, and the answer was already available to the agent in `MEMORY.md` (belief titles are listed below) or in the codebase. This marks a missing or unread belief. | the AGENT text ends with a question; the OWNER text supplies a fact the agent should have known |
+| `question` | The owner is answering a clarifying question the agent asked, and the answer was already available to the agent in long-term memory (memory titles are listed below) or in the codebase. This marks a missing or unread memory. | the AGENT text ends with a question; the OWNER text supplies a fact the agent should have known |
 | `none` | Anything else: a new task, ordinary instructions, neutral acknowledgement, small talk. | "add a page for…", "thanks", "ok, continue" |
 
 Rules:

@@ -11,10 +11,10 @@
 - ...
 
 ## What I fought against
-- <instruction, missing tool, unclear convention, wrong belief in MEMORY.md>
+- <instruction, missing tool, unclear convention, wrong long-term memory>
 
 ## What I wished I had
 - ...
 
-## Beliefs to revise
-- <MEMORY.md belief> → <proposed change>   (or: none)
+## Memory
+- <what went to memory/short-term.md this session, or: nothing>

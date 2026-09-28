@@ -10,7 +10,8 @@ BeforeAll {
     function New-FakeRepo {
         param([string] $Root)
         New-Item -ItemType Directory -Path (Join-Path $Root 'evolution/journal') -Force | Out-Null
-        Set-Content -Path (Join-Path $Root 'MEMORY.md') -Value "# MEMORY`n`n## Beliefs`n`n- **Belief A** (since: gen/0). text"
+        New-Item -ItemType Directory -Path (Join-Path $Root 'memory') -Force | Out-Null
+        Set-Content -Path (Join-Path $Root 'memory/long-term.md') -Value "# Long-term memory`n`n- [Belief A](long-term/belief-a.md) — text"
         Copy-Item $script:Fixture (Join-Path $Root 'transcript.jsonl')
     }
 

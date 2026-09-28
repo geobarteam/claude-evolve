@@ -11,9 +11,9 @@ BeforeAll {
     function New-RepoWithGen1 {
         param([string] $Root)
         New-ContractRepo -Root $Root | Out-Null
-        $memory = [System.IO.File]::ReadAllText((Join-Path $Root 'MEMORY.md')) + "`n- **Evolved belief** (since: gen/1). text`n"
-        $proposal = New-Proposal -Dir (Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))) -Files @{ 'MEMORY.md' = $memory } -Note (New-Note -Summary 'add evolved belief' -Changes @(
-                @{ Title = 'Add evolved belief'; Files = @('MEMORY.md'); Why = 'evolution/journal/2026-09-20-0900.md' }))
+        $memory = [System.IO.File]::ReadAllText((Join-Path $Root '.claude/agents/helper.md')) + "`n- **Evolved belief** (since: gen/1). text`n"
+        $proposal = New-Proposal -Dir (Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))) -Files @{ '.claude/agents/helper.md' = $memory } -Note (New-Note -Summary 'add evolved belief' -Changes @(
+                @{ Title = 'Add evolved belief'; Files = @('.claude/agents/helper.md'); Why = 'evolution/journal/2026-09-20-0900.md' }))
         & $script:Evolver -RepoRoot $Root -ProposalDir $proposal -SkipRegression 2>&1 | Out-Null
     }
 }
@@ -66,7 +66,7 @@ Describe 'Revert-Generation' {
         $LASTEXITCODE | Should -Be 0
         [string] (@(Invoke-RepoGit -Path $script:Root -GitArgs @('log', '-1', '--format=%s')) | Select-Object -First 1) | Should -Match '^Revert "gen\(1\): add evolved belief"'
         [string] (@(Invoke-RepoGit -Path $script:Root -GitArgs @('log', '-1', '--format=%an')) | Select-Object -First 1) | Should -Not -Be 'evolver' -Because 'a revert is the owner''s act, made with the caller''s own git identity'
-        Get-Content (Join-Path $script:Root 'MEMORY.md') -Raw | Should -Not -Match 'Evolved belief'
+        Get-Content (Join-Path $script:Root '.claude/agents/helper.md') -Raw | Should -Not -Match 'Evolved belief'
         (Get-Content (Join-Path $script:Root 'evolution/lineage.md'))[-1] | Should -Match '^\| gen/1 \| .* \| — \| reverted \|'
         (Invoke-RepoGit -Path $script:Root -GitArgs @('status', '--porcelain')) | Should -BeNullOrEmpty
         (Invoke-RepoGit -Path $script:Root -GitArgs @('tag', '-l', 'gen/1')) | Should -Contain 'gen/1' -Because 'history is kept; the tag still marks the generation'
@@ -89,6 +89,6 @@ Describe 'Revert-Generation' {
         & $script:Revert -RepoRoot $script:Root -Generation 1 -Confirm:$false 2>&1 | Out-Null
 
         $LASTEXITCODE | Should -Be 1
-        Get-Content (Join-Path $script:Root 'MEMORY.md') -Raw | Should -Match 'Evolved belief'
+        Get-Content (Join-Path $script:Root '.claude/agents/helper.md') -Raw | Should -Match 'Evolved belief'
     }
 }

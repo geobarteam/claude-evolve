@@ -116,6 +116,7 @@ function Get-EvolveConfig {
     $regression = Get-ConfigValue -Object $raw -Name 'regression' -Default $null
     $proposal = Get-ConfigValue -Object $raw -Name 'proposal' -Default $null
     $classifier = Get-ConfigValue -Object $raw -Name 'classifier' -Default $null
+    $memory = Get-ConfigValue -Object $raw -Name 'memory' -Default $null
 
     return [pscustomobject]@{
         EvolverName         = [string] (Get-ConfigValue -Object $raw -Name 'evolverName' -Default 'evolver')
@@ -134,6 +135,13 @@ function Get-EvolveConfig {
         }
         Classifier          = [pscustomobject]@{
             Model = [string] (Get-ConfigValue -Object $classifier -Name 'model' -Default 'haiku')
+        }
+        Memory              = [pscustomobject]@{
+            MaxLines          = [int] (Get-ConfigValue -Object $memory -Name 'maxLines' -Default 200)
+            MaxBytes          = [int] (Get-ConfigValue -Object $memory -Name 'maxBytes' -Default 25600)
+            Decay             = [double] (Get-ConfigValue -Object $memory -Name 'decay' -Default 0.5)
+            ForgetAfterCycles = [int] (Get-ConfigValue -Object $memory -Name 'forgetAfterCycles' -Default 3)
+            ForgetBelow       = [double] (Get-ConfigValue -Object $memory -Name 'forgetBelow' -Default 1)
         }
         AgentTrailerPattern = [string] (Get-ConfigValue -Object $raw -Name 'agentTrailerPattern' -Default '^Co-Authored-By:\s*Claude\b')
         MainLine            = [string] (Get-ConfigValue -Object $raw -Name 'mainLine' -Default '')

@@ -5,7 +5,7 @@
 
 .DESCRIPTION
     Protected file (plugin engine). Writes the project state the engine needs: the duties section and the
-    protected block in CLAUDE.md, MEMORY.md, the evolution/ tree (journal template, feedback, generations with a
+    protected block in CLAUDE.md, short- and long-term memory under memory/, the evolution/ tree (journal template, feedback, generations with a
     generated gen-0 inventory, lineage, manifests, evolve.json, regression skeletons) and the .gitignore entries.
     Nothing here runs git add, commit or tag.
 #>
@@ -171,7 +171,7 @@ function New-GenerationZeroNote {
     }
 
     $instructions = @()
-    foreach ($rel in 'CLAUDE.md', 'MEMORY.md') {
+    foreach ($rel in 'CLAUDE.md', 'memory/long-term.md', 'memory/short-term.md') {
         $p = Join-Path $ProjectRoot $rel
         if (Test-Path -LiteralPath $p) { $instructions += [pscustomobject]@{ Name = $rel; Description = (Get-FrontMatterDescription -Path $p) } }
     }
@@ -194,7 +194,7 @@ function New-GenerationZeroNote {
     [void] $sb.AppendLine('Score: —')
     [void] $sb.AppendLine('Status: settled (baseline; nothing to revert to)')
     [void] $sb.AppendLine()
-    [void] $sb.AppendLine('This generation makes no behavioural change. It records what the working agent is made of at the moment the evolve plugin was initialised, adds the owner''s protected constraints to `CLAUDE.md`, and creates `MEMORY.md` as the versioned home for project beliefs.')
+    [void] $sb.AppendLine('This generation makes no behavioural change. It records what the working agent is made of at the moment the evolve plugin was initialised, adds the owner''s protected constraints to `CLAUDE.md`, and creates the agent''s memory: `memory/short-term.md` (working notes, consolidated at every generation) and `memory/long-term.md` with `memory/long-term/` (durable memories that strengthen when recalled and are forgotten when unused).')
     [void] $sb.AppendLine()
     [void] $sb.AppendLine('## Genome files')
     [void] $sb.AppendLine()
@@ -218,7 +218,7 @@ function New-GenerationZeroNote {
     [void] $sb.AppendLine('Declined to change:')
     [void] $sb.AppendLine('- nothing')
 
-    $summary = 'Inventory: {0} agent(s), {1} skill(s), {2} command(s), {3} instruction file(s), {4} template(s); protected block and duties added to CLAUDE.md; MEMORY.md created' -f `
+    $summary = 'Inventory: {0} agent(s), {1} skill(s), {2} command(s), {3} instruction file(s), {4} template(s); protected block and duties added to CLAUDE.md; short- and long-term memory created' -f `
         $sections['Sub-agents'].Count, $sections['Skills'].Count, $sections['Commands'].Count, $instructionFiles.Count, $sections['Templates'].Count
 
     return [pscustomobject]@{ Text = $sb.ToString(); Summary = $summary; Warning = $warning }
@@ -310,7 +310,7 @@ function Test-DuplicateHooks {
 function Copy-ProjectTemplates {
     <#
     .SYNOPSIS
-        MEMORY.md, the journal template, both manifests, the feedback folder and the generations folder, each only when missing.
+        Short- and long-term memory, the journal template, both manifests, the feedback folder and the generations folder, each only when missing.
     .OUTPUTS
         Objects with Path (repo-relative) and Status ('created' | 'kept').
     #>
@@ -318,7 +318,9 @@ function Copy-ProjectTemplates {
     param([Parameter(Mandatory)] [string] $ProjectRoot)
 
     $map = [ordered]@{
-        'MEMORY.md'                             = 'MEMORY.md'
+        'memory/long-term.md'                   = 'memory-long-term.md'
+        'memory/short-term.md'                  = 'memory-short-term.md'
+        'memory/long-term/.gitkeep'             = $null
         'evolution/journal/TEMPLATE.md'         = 'journal-TEMPLATE.md'
         'evolution/evolver/genome-paths.txt'    = 'genome-paths.txt'
         'evolution/evolver/protected-paths.txt' = 'protected-paths.txt'
@@ -336,4 +338,85 @@ function Copy-ProjectTemplates {
     return @($results)
 }
 
-Export-ModuleMember -Function Test-ProjectInitialised, Get-ProtectedBlockTemplate, Add-ProtectedBlock, Compare-ProtectedBlock, Add-DutiesSection, Get-FrontMatterDescription, New-GenerationZeroNote, New-LineageFile, New-EvolveConfig, New-RegressionSkeletons, Add-GitignoreEntries, Test-DuplicateHooks, Copy-ProjectTemplates
+function ConvertTo-MemorySlug {
+    param([Parameter(Mandatory)] [string] $Title)
+    $slug = ($Title.ToLowerInvariant() -replace '[^a-z0-9]+', '-').Trim('-')
+    if ($slug.Length -gt 60) { $slug = $slug.Substring(0, 60).Trim('-') }
+    if (-not $slug) { $slug = 'memory' }
+    return $slug
+}
+
+function Convert-LegacyMemory {
+    <#
+    .SYNOPSIS
+        Migrates a project initialised before the brain model: every bullet of MEMORY.md becomes one long-term memory.
+    .DESCRIPTION
+        Runs only when MEMORY.md exists and memory/long-term.md does not. A `- **Title** text` bullet keeps its title;
+        a plain bullet is titled by its first words. Continuation lines stay with their bullet. MEMORY.md itself is left
+        in place for the owner to delete. Returns the number of memories created, or -1 when nothing was migrated.
+    #>
+    [CmdletBinding()]
+    param([Parameter(Mandatory)] [string] $ProjectRoot)
+
+    $legacy = Join-Path $ProjectRoot 'MEMORY.md'
+    $index = Join-Path $ProjectRoot 'memory/long-term.md'
+    if (-not (Test-Path -LiteralPath $legacy) -or (Test-Path -LiteralPath $index)) { return -1 }
+
+    $entries = [System.Collections.Generic.List[object]]::new()
+    $current = $null
+    foreach ($line in (ConvertTo-Lf (Read-ProjectText -Path $legacy)) -split "`n") {
+        if ($line -match '^#') { $current = $null; continue }
+        if ($line -match '^\s*[-*]\s+(.+)$') {
+            $text = $Matches[1].Trim()
+            if ($text -match '^_\(.*\)_$') { $current = $null; continue }
+            $title = if ($text -match '^\*\*(.+?)\*\*\s*(.*)$') { $Matches[1].Trim(); $text = $Matches[2].Trim() } else { (($text -split '\s+') | Select-Object -First 8) -join ' ' }
+            $current = [pscustomobject]@{ Title = $title.TrimEnd('.', ':'); Body = [System.Collections.Generic.List[string]]::new() }
+            if ($text) { $current.Body.Add($text) }
+            $entries.Add($current)
+            continue
+        }
+        if ($current -and $line.Trim()) { $current.Body.Add($line.Trim()) }
+    }
+
+    $today = [datetime]::UtcNow.ToString('yyyy-MM-dd')
+    $lines = [System.Collections.Generic.List[string]]::new()
+    $used = @{}
+    foreach ($entry in $entries) {
+        $slug = ConvertTo-MemorySlug -Title $entry.Title
+        $base = $slug; $n = 2
+        while ($used.ContainsKey($slug)) { $slug = "$base-$n"; $n++ }
+        $used[$slug] = $true
+        $body = ($entry.Body -join ' ').Trim()
+        if (-not $body) { $body = $entry.Title }
+        $hook = ($body -split '(?<=\.)\s', 2)[0]
+        if ($hook.Length -gt 120) { $hook = $hook.Substring(0, 117) + '...' }
+        $content = "---`nname: $slug`ndescription: $($entry.Title)`nsince: $today`nrecalls: 0`nlast_recalled: never`nstrength: 1`nidle_cycles: 0`n---`n$body`n"
+        Write-ProjectText -Path (Join-Path $ProjectRoot "memory/long-term/$slug.md") -Content $content
+        $lines.Add("- [$($entry.Title)](long-term/$slug.md) — $hook")
+    }
+    $indexText = (Get-InitTemplate 'memory-long-term.md').TrimEnd() + "`n"
+    if ($lines.Count -gt 0) { $indexText += "`n" + ($lines -join "`n") + "`n" }
+    Write-ProjectText -Path $index -Content $indexText
+    return $lines.Count
+}
+
+function Add-MemoryManifestEntries {
+    <#
+    .SYNOPSIS
+        Adds the memory paths to an existing genome manifest (a project initialised before the brain model). Returns 'created' or 'kept'.
+    #>
+    [CmdletBinding()]
+    param([Parameter(Mandatory)] [string] $ProjectRoot)
+
+    $path = Join-Path $ProjectRoot 'evolution/evolver/genome-paths.txt'
+    if (-not (Test-Path -LiteralPath $path)) { return 'kept' }
+    $content = ConvertTo-Lf (Read-ProjectText -Path $path)
+    $present = @($content -split "`n" | ForEach-Object { $_.Trim() })
+    $missing = @('memory/long-term.md', 'memory/long-term/**', 'memory/short-term.md' | Where-Object { $_ -notin $present })
+    if ($missing.Count -eq 0) { return 'kept' }
+    $new = $content.TrimEnd() + "`n`n# Memory (consolidated at every generation; not counted against the edit budget)`n" + ($missing -join "`n") + "`n"
+    Write-ProjectText -Path $path -Content $new
+    return 'created'
+}
+
+Export-ModuleMember -Function Convert-LegacyMemory, Add-MemoryManifestEntries, Test-ProjectInitialised, Get-ProtectedBlockTemplate, Add-ProtectedBlock, Compare-ProtectedBlock, Add-DutiesSection, Get-FrontMatterDescription, New-GenerationZeroNote, New-LineageFile, New-EvolveConfig, New-RegressionSkeletons, Add-GitignoreEntries, Test-DuplicateHooks, Copy-ProjectTemplates

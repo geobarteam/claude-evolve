@@ -2,13 +2,14 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-    SessionStart hook: injects MEMORY.md and the last 3 journal entries into the new session's context.
+    SessionStart hook: injects long-term memory (the index), short-term memory and the last 3 journal entries.
 
 .DESCRIPTION
-    Protected file. Wired in .claude/settings.json. Reads the hook JSON from stdin (or -InputJson in tests).
-    On startup/resume/clear it also records the session start in evolution/.state/<session_id>.json,
-    which the Stop hook uses to name the journal file. On compact/fork only MEMORY.md is re-injected.
-    Whatever this script writes to stdout is added to the model's context (exit code 0).
+    Protected file. Wired in hooks/hooks.json. Reads the hook JSON from stdin (or -InputJson in tests).
+    Both memory files are cut to the memory limits of evolution/evolve.json (default 200 lines / 25 KB), the
+    limits Claude Code applies to its own memory index. On startup/resume/clear it also records the session start
+    in evolution/.state/<session_id>.json, which the Stop hook uses to name the journal file. On compact/fork only
+    the memory is re-injected. Whatever this script writes to stdout is added to the model's context (exit code 0).
 #>
 [CmdletBinding()]
 param(
@@ -18,6 +19,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Import-Module "$PSScriptRoot/../scripts/lib/HookInput.psm1" -Force
+Import-Module "$PSScriptRoot/../scripts/lib/Config.psm1" -Force
+Import-Module "$PSScriptRoot/../scripts/lib/Memory.psm1" -Force
 
 if (Test-HookSuppressed) { exit 0 }
 
@@ -27,13 +30,22 @@ try {
     $root = Resolve-RepoRoot -RepoRoot $RepoRoot -HookInput $hookInput
     $sessionId = [string] (Get-HookProperty -Object $hookInput -Name 'session_id' -Default 'unknown-session')
     $source = [string] (Get-HookProperty -Object $hookInput -Name 'source' -Default 'startup')
+    $limits = (Get-EvolveConfig -ProjectRoot $root).Memory
+    $layout = Get-MemoryLayout
 
     $output = [System.Text.StringBuilder]::new()
 
-    $memoryPath = Join-Path $root 'MEMORY.md'
-    if (Test-Path -LiteralPath $memoryPath) {
-        [void] $output.AppendLine('# MEMORY.md (genome — project beliefs)')
-        [void] $output.AppendLine((Get-Content -LiteralPath $memoryPath -Raw))
+    $sections = [ordered]@{
+        $layout.LongTermIndex = "# Long-term memory ($($layout.LongTermIndex): cues; read the linked file under $($layout.LongTermDir)/ before relying on one — reads are counted)"
+        $layout.ShortTerm     = "# Short-term memory ($($layout.ShortTerm): your working notes since the last consolidation)"
+    }
+    foreach ($rel in $sections.Keys) {
+        $path = Join-Path $root $rel
+        if (-not (Test-Path -LiteralPath $path)) { continue }
+        $cut = Limit-MemoryText -Text ([System.IO.File]::ReadAllText($path)) -Limits $limits
+        [void] $output.AppendLine($sections[$rel])
+        [void] $output.AppendLine($cut.Text)
+        if ($cut.Truncated) { [void] $output.AppendLine("(cut at $($limits.MaxLines) lines / $($limits.MaxBytes) bytes; the rest of $rel was not loaded)") }
         [void] $output.AppendLine()
     }
 
@@ -66,8 +78,8 @@ try {
         }
 
         $journalName = Get-JournalFileName -RepoRoot $root -SessionId $sessionId
-        [void] $output.AppendLine('# Journal duty')
-        [void] $output.AppendLine("Session id: $sessionId. Before each of your turns ends, create or update ``evolution/journal/$journalName`` from ``evolution/journal/TEMPLATE.md``. Its first line must be ``<!-- session: $sessionId -->``. The Stop hook blocks the turn until that file is newer than the owner's last prompt. Keep it short and honest; 'What I fought against' and 'Beliefs to revise' are the evolver's main evidence. Owner shortcut: a prompt of exactly ``+`` or ``- <reason>`` rates the session.")
+        [void] $output.AppendLine('# Journal and memory duty')
+        [void] $output.AppendLine("Session id: $sessionId. Before each of your turns ends, create or update ``evolution/journal/$journalName`` from ``evolution/journal/TEMPLATE.md``. Its first line must be ``<!-- session: $sessionId -->``. The Stop hook blocks the turn until that file is newer than the owner's last prompt. Keep it short and honest; 'What I fought against' is the evolver's main evidence. Anything worth remembering beyond this session goes to ``$($layout.ShortTerm)`` as one dated bullet; never edit long-term memory. Owner shortcut: a prompt of exactly ``+`` or ``- <reason>`` rates the session.")
     }
 
     Write-Output $output.ToString()

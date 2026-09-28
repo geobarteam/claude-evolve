@@ -2,12 +2,16 @@
 # One repo-relative path or glob per line. '**' matches any depth. Lines starting with '#' are ignored.
 # Read by the plugin (Genome.psm1, Get-GenomeManifest). Protected file: the evolver may not edit it.
 
-# Heritable material
+# Heritable material (counted against the edit budget)
 CLAUDE.md
-MEMORY.md
 .claude/agents/**
 .claude/skills/**
 .claude/tools/**
+
+# Memory (consolidated at every generation; not counted against the edit budget)
+memory/long-term.md
+memory/long-term/**
+memory/short-term.md
 
 # Generation bookkeeping (allowed in a generation commit, not counted against the edit budget)
 evolution/generations/**

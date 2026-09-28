@@ -1,0 +1,517 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="188" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2026-09-22" time="10:20:34">
+  <environment clr-version="10.0.11" user="GV10141" platform="Microsoft Windows 11 Enterprise|C:\WINDOWS|\Device\Harddisk0\Partition2" cwd="D:\Data\gv10141\Repos\Common\claude-evolve-plugin" os-version="10.0.26200" machine-name="LT256076" user-domain="RIZIV" nunit-version="2.5.8.0" />
+  <culture-info current-culture="fr-BE" current-uiculture="en-US" />
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Success" success="True" time="105.6893" asserts="0" description="Pester">
+    <results>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Command.Tests.ps1" executed="True" result="Success" success="True" time="3.7046" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Command.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="evolve skills" executed="True" result="Success" success="True" time="0.4653" asserts="0" description="evolve skills">
+            <results>
+              <test-case description="EvolveSkills_SixSubcommands_EachHasNameAndDescriptionFrontMatter" name="evolve skills.EvolveSkills_SixSubcommands_EachHasNameAndDescriptionFrontMatter" time="0.2078" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="EvolveSkills_EveryScriptTheyName_ExistsUnderPluginScripts" name="evolve skills.EvolveSkills_EveryScriptTheyName_ExistsUnderPluginScripts" time="0.0811" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="EvolveSkills_NeverReferenceProjectRelativeEnginePaths" name="evolve skills.EvolveSkills_NeverReferenceProjectRelativeEnginePaths" time="0.0242" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="EvolveSkills_RevertSection_RequiresExplicitYesBeforeRunning" name="evolve skills.EvolveSkills_RevertSection_RequiresExplicitYesBeforeRunning" time="0.0187" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="EvolveSkills_ContainNoPushOrScheduleInstruction" name="evolve skills.EvolveSkills_ContainNoPushOrScheduleInstruction" time="0.0192" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="EvolveSkills_ProposeAndScore_DoNotHardCodeTheTaskCount" name="evolve skills.EvolveSkills_ProposeAndScore_DoNotHardCodeTheTaskCount" time="0.0154" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Collect-DailyFeedback transcript folder report" executed="True" result="Success" success="True" time="1.929" asserts="0" description="Collect-DailyFeedback transcript folder report">
+            <results>
+              <test-case description="CollectDaily_ExplicitTranscriptDir_PrintsItAsConfigured" name="Collect-DailyFeedback transcript folder report.CollectDaily_ExplicitTranscriptDir_PrintsItAsConfigured" time="0.4701" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="CollectDaily_NoTranscriptDir_PrintsTheDerivedFolder" name="Collect-DailyFeedback transcript folder report.CollectDaily_NoTranscriptDir_PrintsTheDerivedFolder" time="0.3369" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Config.Tests.ps1" executed="True" result="Success" success="True" time="0.4241" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Config.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Resolve-ProjectRoot" executed="True" result="Success" success="True" time="0.1595" asserts="0" description="Resolve-ProjectRoot">
+            <results>
+              <test-case description="ResolveProjectRoot_ExplicitParameter_WinsOverEnvironment" name="Resolve-ProjectRoot.ResolveProjectRoot_ExplicitParameter_WinsOverEnvironment" time="0.0442" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="ResolveProjectRoot_ClaudeProjectDirSet_ReturnsIt" name="Resolve-ProjectRoot.ResolveProjectRoot_ClaudeProjectDirSet_ReturnsIt" time="0.0246" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="ResolveProjectRoot_HookInputCwd_UsedWhenNoEnvironment" name="Resolve-ProjectRoot.ResolveProjectRoot_HookInputCwd_UsedWhenNoEnvironment" time="0.0168" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="ResolveProjectRoot_NothingSet_ReturnsCurrentDirectory" name="Resolve-ProjectRoot.ResolveProjectRoot_NothingSet_ReturnsCurrentDirectory" time="0.0168" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="ResolveProjectRoot_Never_ReturnsPluginRoot" name="Resolve-ProjectRoot.ResolveProjectRoot_Never_ReturnsPluginRoot" time="0.0156" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="ResolveProjectRoot_ExplicitMissingFolder_Throws" name="Resolve-ProjectRoot.ResolveProjectRoot_ExplicitMissingFolder_Throws" time="0.0374" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Get-PluginRoot" executed="True" result="Success" success="True" time="0.1909" asserts="0" description="Get-PluginRoot">
+            <results>
+              <test-case description="GetPluginRoot_NoEnvironment_ReturnsFolderAboveScripts" name="Get-PluginRoot.GetPluginRoot_NoEnvironment_ReturnsFolderAboveScripts" time="0.0289" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="ConvertTo-ClaudeProjectFolderName" executed="True" result="Success" success="True" time="0.2188" asserts="0" description="ConvertTo-ClaudeProjectFolderName">
+            <results>
+              <test-case description="ConvertToClaudeProjectFolderName_KnownWindowsPath_MatchesClaudeCodeEncoding" name="ConvertTo-ClaudeProjectFolderName.ConvertToClaudeProjectFolderName_KnownWindowsPath_MatchesClaudeCodeEncoding" time="0.0143" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="ConvertToClaudeProjectFolderName_PosixPath_ReplacesSlashesAndDots" name="ConvertTo-ClaudeProjectFolderName.ConvertToClaudeProjectFolderName_PosixPath_ReplacesSlashesAndDots" time="0.0113" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Get-TranscriptDir" executed="True" result="Success" success="True" time="0.2632" asserts="0" description="Get-TranscriptDir">
+            <results>
+              <test-case description="GetTranscriptDir_Configured_ReturnsConfiguredValue" name="Get-TranscriptDir.GetTranscriptDir_Configured_ReturnsConfiguredValue" time="0.0105" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="GetTranscriptDir_NotConfigured_DerivesFromProjectRootUnderHome" name="Get-TranscriptDir.GetTranscriptDir_NotConfigured_DerivesFromProjectRootUnderHome" time="0.0145" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\ConfigWiring.Tests.ps1" executed="True" result="Success" success="True" time="9.8574" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\ConfigWiring.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Invoke-Evolver reads evolve.json" executed="True" result="Success" success="True" time="5.8841" asserts="0" description="Invoke-Evolver reads evolve.json">
+            <results>
+              <test-case description="Evolver_ConfiguredIdentity_CommitsWithThatNameAndEmail" name="Invoke-Evolver reads evolve.json.Evolver_ConfiguredIdentity_CommitsWithThatNameAndEmail" time="2.2057" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Evolver_ConfiguredMaxEdits2_RefusesThreeChanges" name="Invoke-Evolver reads evolve.json.Evolver_ConfiguredMaxEdits2_RefusesThreeChanges" time="1.7061" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Evolver_ExplicitMaxEdits_WinsOverFile" name="Invoke-Evolver reads evolve.json.Evolver_ExplicitMaxEdits_WinsOverFile" time="1.8192" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Invoke-Regression reads evolve.json" executed="True" result="Success" success="True" time="8.667" asserts="0" description="Invoke-Regression reads evolve.json">
+            <results>
+              <test-case description="InvokeRegression_ConfiguredAllowedToolsAndModel_PassedToClaude" name="Invoke-Regression reads evolve.json.InvokeRegression_ConfiguredAllowedToolsAndModel_PassedToClaude" time="1.4421" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="InvokeRegression_ExplicitModel_WinsOverFile" name="Invoke-Regression reads evolve.json.InvokeRegression_ExplicitModel_WinsOverFile" time="1.2575" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="GitSignals trailer pattern" executed="True" result="Success" success="True" time="9.3801" asserts="0" description="GitSignals trailer pattern">
+            <results>
+              <test-case description="GetAgentCommits_CustomTrailerPattern_MatchesOnlyThatTrailer" name="GitSignals trailer pattern.GetAgentCommits_CustomTrailerPattern_MatchesOnlyThatTrailer" time="0.6965" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="SessionEnd reads evolve.json" executed="True" result="Success" success="True" time="9.5878" asserts="0" description="SessionEnd reads evolve.json">
+            <results>
+              <test-case description="SessionEnd_ConfiguredClassifierModel_PassedToClaude" name="SessionEnd reads evolve.json.SessionEnd_ConfiguredClassifierModel_PassedToClaude" time="0.201" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\ContractBoundaries.Tests.ps1" executed="True" result="Success" success="True" time="6.4635" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\ContractBoundaries.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Test-PathInsideProject" executed="True" result="Success" success="True" time="0.0335" asserts="0" description="Test-PathInsideProject">
+            <results>
+              <test-case description="TestPathInsideProject_RelativePathWithoutParentSegment_True" name="Test-PathInsideProject.TestPathInsideProject_RelativePathWithoutParentSegment_True" time="0.01" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="TestPathInsideProject_ParentSegment_False" name="Test-PathInsideProject.TestPathInsideProject_ParentSegment_False" time="0.012" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="TestPathInsideProject_RootedPath_False" name="Test-PathInsideProject.TestPathInsideProject_RootedPath_False" time="0.0096" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Contract boundaries" executed="True" result="Success" success="True" time="3.9398" asserts="0" description="Contract boundaries">
+            <results>
+              <test-case description="Contract_EvolveJsonChanged_FailsAsProtectedPath" name="Contract boundaries.Contract_EvolveJsonChanged_FailsAsProtectedPath" time="0.6889" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Contract_ManifestWithoutEvolveJson_StillProtectsItAtRuntime" name="Contract boundaries.Contract_ManifestWithoutEvolveJson_StillProtectsItAtRuntime" time="0.8761" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Contract_PluginRootInsideProject_FileUnderItFailsAsProtectedPath" name="Contract boundaries.Contract_PluginRootInsideProject_FileUnderItFailsAsProtectedPath" time="0.7045" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Contract_PluginRootOutsideProject_AddsNothingAndPasses" name="Contract boundaries.Contract_PluginRootOutsideProject_AddsNothingAndPasses" time="0.7417" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Checker_PluginRootParameter_PassedThrough" name="Contract boundaries.Checker_PluginRootParameter_PassedThrough" time="0.69" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Evolver evidence bundle" executed="True" result="Success" success="True" time="6.1762" asserts="0" description="Evolver evidence bundle">
+            <results>
+              <test-case description="Evolver_EvidenceBundle_ListsEvolveJsonAndPluginRootAsProtected" name="Evolver evidence bundle.Evolver_EvidenceBundle_ListsEvolveJsonAndPluginRootAsProtected" time="2.1879" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\EvolveConfig.Tests.ps1" executed="True" result="Success" success="True" time="0.3078" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\EvolveConfig.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Get-EvolveConfig" executed="True" result="Success" success="True" time="0.1534" asserts="0" description="Get-EvolveConfig">
+            <results>
+              <test-case description="GetEvolveConfig_NoFile_ReturnsEverySpecDefault" name="Get-EvolveConfig.GetEvolveConfig_NoFile_ReturnsEverySpecDefault" time="0.0176" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="GetEvolveConfig_DefaultEvolverEmail_UsesLowerCaseProjectFolderName" name="Get-EvolveConfig.GetEvolveConfig_DefaultEvolverEmail_UsesLowerCaseProjectFolderName" time="0.0148" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="GetEvolveConfig_PartialFile_OverridesOnlyGivenKeys" name="Get-EvolveConfig.GetEvolveConfig_PartialFile_OverridesOnlyGivenKeys" time="0.0218" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="GetEvolveConfig_EmptyStringsInFile_FallBackToDefaults" name="Get-EvolveConfig.GetEvolveConfig_EmptyStringsInFile_FallBackToDefaults" time="0.0218" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="GetEvolveConfig_TranscriptDirKey_Wins" name="Get-EvolveConfig.GetEvolveConfig_TranscriptDirKey_Wins" time="0.0179" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="GetEvolveConfig_InvalidJson_ThrowsNamingTheFile" name="Get-EvolveConfig.GetEvolveConfig_InvalidJson_ThrowsNamingTheFile" time="0.0221" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="GetEvolveConfig_TemplateFile_ParsesToTheDefaults" name="Get-EvolveConfig.GetEvolveConfig_TemplateFile_ParsesToTheDefaults" time="0.0247" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Evolver.Commit.Tests.ps1" executed="True" result="Success" success="True" time="14.4832" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Evolver.Commit.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Invoke-Evolver commit contract" executed="True" result="Success" success="True" time="14.1959" asserts="0" description="Invoke-Evolver commit contract">
+            <results>
+              <test-case description="Evolver_ValidProposalAndScoreNotLower_CommitsTagsAndAppendsLineage" name="Invoke-Evolver commit contract.Evolver_ValidProposalAndScoreNotLower_CommitsTagsAndAppendsLineage" time="2.7388" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Evolver_Always_CommitsWithEvolverIdentityOnly" name="Invoke-Evolver commit contract.Evolver_Always_CommitsWithEvolverIdentityOnly" time="2.4642" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Evolver_ScoreLower_DropsEditRetriesOnceThenRecordsRejected" name="Invoke-Evolver commit contract.Evolver_ScoreLower_DropsEditRetriesOnceThenRecordsRejected" time="4.1227" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Evolver_ContractViolation_RefusesWithoutCommit" name="Invoke-Evolver commit contract.Evolver_ContractViolation_RefusesWithoutCommit" time="1.3787" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Evolver_OwnerHasUncommittedGenomeChanges_RefusesToTouchThem" name="Invoke-Evolver commit contract.Evolver_OwnerHasUncommittedGenomeChanges_RefusesToTouchThem" time="0.7476" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Evolver_Always_RemovesItsWorktree" name="Invoke-Evolver commit contract.Evolver_Always_RemovesItsWorktree" time="2.4059" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Evolver.Run.Tests.ps1" executed="True" result="Success" success="True" time="20.4602" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Evolver.Run.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Invoke-Evolver run mode" executed="True" result="Success" success="True" time="20.1082" asserts="0" description="Invoke-Evolver run mode">
+            <results>
+              <test-case description="Evolver_NoNewJournals_ExitsWithoutClaudeCall" name="Invoke-Evolver run mode.Evolver_NoNewJournals_ExitsWithoutClaudeCall" time="0.8074" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Evolver_ShimProposal_ProducesGenCommitWithThreeCitedChanges" name="Invoke-Evolver run mode.Evolver_ShimProposal_ProducesGenCommitWithThreeCitedChanges" time="5.5508" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Evolver_ClaudeCall_SilencesHooksAndLimitsTools" name="Invoke-Evolver run mode.Evolver_ClaudeCall_SilencesHooksAndLimitsTools" time="5.093" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Evolver_RevertCommitSinceLastRun_AppendsRevertedRow" name="Invoke-Evolver run mode.Evolver_RevertCommitSinceLastRun_AppendsRevertedRow" time="6.5991" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Evolver_ProvisionalOlderThan14Days_MarkedSettled" name="Invoke-Evolver run mode.Evolver_ProvisionalOlderThan14Days_MarkedSettled" time="1.7763" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Feedback.Tests.ps1" executed="True" result="Success" success="True" time="0.461" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Feedback.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Get-PairedOwnerTurns" executed="True" result="Success" success="True" time="0.0251" asserts="0" description="Get-PairedOwnerTurns">
+            <results>
+              <test-case description="GetPairedOwnerTurns_Fixture_PairsEachOwnerTurnWithPrecedingAgentAction" name="Get-PairedOwnerTurns.GetPairedOwnerTurns_Fixture_PairsEachOwnerTurnWithPrecedingAgentAction" time="0.0231" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Write-FeedbackRecord" executed="True" result="Success" success="True" time="0.06" asserts="0" description="Write-FeedbackRecord">
+            <results>
+              <test-case description="WriteFeedbackRecord_AppendsOneJsonLineWithRequiredFields" name="Write-FeedbackRecord.WriteFeedbackRecord_AppendsOneJsonLineWithRequiredFields" time="0.0317" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Invoke-Classifier" executed="True" result="Success" success="True" time="0.1325" asserts="0" description="Invoke-Classifier">
+            <results>
+              <test-case description="InvokeClassifier_ShimReturnsFrustration_RecordWeightedAboveCorrection" name="Invoke-Classifier.InvokeClassifier_ShimReturnsFrustration_RecordWeightedAboveCorrection" time="0.0219" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="NewClassifierPrompt_ContainsRubricAndNumberedPairsAndBeliefTitles" name="Invoke-Classifier.NewClassifierPrompt_ContainsRubricAndNumberedPairsAndBeliefTitles" time="0.0212" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="InvokeClassifier_CallsClaudeWithBareNoSessionPersistenceAndJsonSchema" name="Invoke-Classifier.InvokeClassifier_CallsClaudeWithBareNoSessionPersistenceAndJsonSchema" time="0.0273" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Resolve-ClaudeCommand" executed="True" result="Success" success="True" time="0.1757" asserts="0" description="Resolve-ClaudeCommand">
+            <results>
+              <test-case description="ResolveClaudeCommand_ExplicitPath_ReturnedUnchanged" name="Resolve-ClaudeCommand.ResolveClaudeCommand_ExplicitPath_ReturnedUnchanged" time="0.0095" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="ResolveClaudeCommand_EnvOverride_Wins" name="Resolve-ClaudeCommand.ResolveClaudeCommand_EnvOverride_Wins" time="0.0107" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="ResolveClaudeCommand_Default_NeverReturnsAPowerShellShim" name="Resolve-ClaudeCommand.ResolveClaudeCommand_Default_NeverReturnsAPowerShellShim" time="0.0208" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Session processing markers" executed="True" result="Success" success="True" time="0.1947" asserts="0" description="Session processing markers">
+            <results>
+              <test-case description="SetSessionProcessed_ThenTest_ReturnsTrue" name="Session processing markers.SetSessionProcessed_ThenTest_ReturnsTrue" time="0.0154" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Genome.Tests.ps1" executed="True" result="Success" success="True" time="0.7529" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Genome.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Get-ProtectedSection" executed="True" result="Success" success="True" time="0.0574" asserts="0" description="Get-ProtectedSection">
+            <results>
+              <test-case description="GetProtectedSection_ClaudeMd_ReturnsExactlyOneBlockWithOwnerOverrideStatement" name="Get-ProtectedSection.GetProtectedSection_ClaudeMd_ReturnsExactlyOneBlockWithOwnerOverrideStatement" time="0.0147" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="GetProtectedSection_TwoBlocks_Throws" name="Get-ProtectedSection.GetProtectedSection_TwoBlocks_Throws" time="0.0208" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="GetProtectedSection_NoBlock_Throws" name="Get-ProtectedSection.GetProtectedSection_NoBlock_Throws" time="0.0159" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Get-GenomeManifest" executed="True" result="Success" success="True" time="0.0939" asserts="0" description="Get-GenomeManifest">
+            <results>
+              <test-case description="GetGenomeManifest_EveryListedNonGlobPathExists" name="Get-GenomeManifest.GetGenomeManifest_EveryListedNonGlobPathExists" time="0.0192" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="TestPathInManifest_GlobAndExactEntries_MatchAsExpected" name="Get-GenomeManifest.TestPathInManifest_GlobAndExactEntries_MatchAsExpected" time="0.0126" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Lineage" executed="True" result="Success" success="True" time="0.1103" asserts="0" description="Lineage">
+            <results>
+              <test-case description="Lineage_HasGen0Row" name="Lineage.Lineage_HasGen0Row" time="0.0114" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\GenomeContract.Tests.ps1" executed="True" result="Success" success="True" time="12.3161" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\GenomeContract.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Test-GenomeContract" executed="True" result="Success" success="True" time="7.4796" asserts="0" description="Test-GenomeContract">
+            <results>
+              <test-case description="Contract_NoChanges_Passes" name="Test-GenomeContract.Contract_NoChanges_Passes" time="0.6379" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Contract_EditInsideProtectedBlock_Fails" name="Test-GenomeContract.Contract_EditInsideProtectedBlock_Fails" time="0.7247" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Contract_HookFileChanged_Fails" name="Test-GenomeContract.Contract_HookFileChanged_Fails" time="0.6513" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Contract_NonGenomePathChanged_Fails" name="Test-GenomeContract.Contract_NonGenomePathChanged_Fails" time="0.6533" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Contract_FourGenomeEdits_Fails" name="Test-GenomeContract.Contract_FourGenomeEdits_Fails" time="0.7194" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Contract_NoteWithoutEvidenceRef_Fails" name="Test-GenomeContract.Contract_NoteWithoutEvidenceRef_Fails" time="0.6394" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Contract_GenomeEditWithoutNote_Fails" name="Test-GenomeContract.Contract_GenomeEditWithoutNote_Fails" time="0.639" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Contract_ThreeEditsWithEvidence_Passes" name="Test-GenomeContract.Contract_ThreeEditsWithEvidence_Passes" time="0.7107" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Contract_CommittedRange_ChecksBaseToHead" name="Test-GenomeContract.Contract_CommittedRange_ChecksBaseToHead" time="0.8222" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Checker_Script_ExitsOneAndNamesViolation" name="Test-GenomeContract.Checker_Script_ExitsOneAndNamesViolation" time="0.9068" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="CI re-check options" executed="True" result="Success" success="True" time="11.0761" asserts="0" description="CI re-check options">
+            <results>
+              <test-case description="Contract_OnlyIfAuthor_NonEvolverCommit_ExitsZero" name="CI re-check options.Contract_OnlyIfAuthor_NonEvolverCommit_ExitsZero" time="0.6789" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Contract_OnlyIfAuthor_EvolverCommit_IsChecked" name="CI re-check options.Contract_OnlyIfAuthor_EvolverCommit_IsChecked" time="0.815" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Contract_FlaggedPhraseInGenerationNote_Fails" name="CI re-check options.Contract_FlaggedPhraseInGenerationNote_Fails" time="0.9642" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Contract_ScanNotes_CleanNote_Passes" name="CI re-check options.Contract_ScanNotes_CleanNote_Passes" time="0.9729" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Lineage helpers" executed="True" result="Success" success="True" time="12.0566" asserts="0" description="Lineage helpers">
+            <results>
+              <test-case description="GetLineageState_ReadsLastGenerationAndScore" name="Lineage helpers.GetLineageState_ReadsLastGenerationAndScore" time="0.4712" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="AddLineageRow_AppendsWellFormedRow" name="Lineage helpers.AddLineageRow_AppendsWellFormedRow" time="0.4371" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\GitSignals.Tests.ps1" executed="True" result="Success" success="True" time="12.1456" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\GitSignals.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="GitSignals" executed="True" result="Success" success="True" time="3.2607" asserts="0" description="GitSignals">
+            <results>
+              <test-case description="GetAgentCommits_TrailerPresent_ReturnsOnlyAgentCommits" name="GitSignals.GetAgentCommits_TrailerPresent_ReturnsOnlyAgentCommits" time="0.0643" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="GetCodeCorrections_OwnerEditsAgentLine_RecordsVerbatimDiffAndAgentRef" name="GitSignals.GetCodeCorrections_OwnerEditsAgentLine_RecordsVerbatimDiffAndAgentRef" time="0.4256" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="GetCodeCorrections_FullRevert_RecordsCodeRevert" name="GitSignals.GetCodeCorrections_FullRevert_RecordsCodeRevert" time="0.3555" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="GetBugAttributions_FixCommitTouchingAgentLines_RecordsAgentRef" name="GitSignals.GetBugAttributions_FixCommitTouchingAgentLines_RecordsAgentRef" time="0.2175" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="GetCommitMarkers_AgentBadWithReason_RecordsReason" name="GitSignals.GetCommitMarkers_AgentBadWithReason_RecordsReason" time="0.0776" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="GetDiffSurvival_HalfLinesReplaced_ReturnsPointFive" name="GitSignals.GetDiffSurvival_HalfLinesReplaced_ReturnsPointFive" time="0.2949" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="GetGenerationReverts_RevertOfGenCommit_RecordsGeneration" name="GitSignals.GetGenerationReverts_RevertOfGenCommit_RecordsGeneration" time="0.0609" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Invoke-GitSignals and daily collection" executed="True" result="Success" success="True" time="11.854" asserts="0" description="Invoke-GitSignals and daily collection">
+            <results>
+              <test-case description="InvokeGitSignals_FirstRun_WritesAllSignalsAndSecondRunWritesNone" name="Invoke-GitSignals and daily collection.InvokeGitSignals_FirstRun_WritesAllSignalsAndSecondRunWritesNone" time="3.8594" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="InvokeGitSignals_NotAGitRepo_ReturnsZeroWithoutThrowing" name="Invoke-GitSignals and daily collection.InvokeGitSignals_NotAGitRepo_ReturnsZeroWithoutThrowing" time="1.833" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="CollectDaily_RunsGitSignals_WritesCommitMarkerRecord" name="Invoke-GitSignals and daily collection.CollectDaily_RunsGitSignals_WritesCommitMarkerRecord" time="2.8241" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Hooks.PostToolUse.Tests.ps1" executed="True" result="Success" success="True" time="0.3607" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Hooks.PostToolUse.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="PostToolUse hook" executed="True" result="Success" success="True" time="0.1608" asserts="0" description="PostToolUse hook">
+            <results>
+              <test-case description="PostToolUse_SkillCall_WritesUsageRecordWithSkillName" name="PostToolUse hook.PostToolUse_SkillCall_WritesUsageRecordWithSkillName" time="0.0679" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="PostToolUse_AgentCall_WritesUsageRecordWithAgentType" name="PostToolUse hook.PostToolUse_AgentCall_WritesUsageRecordWithAgentType" time="0.0203" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="PostToolUse_TaskCallWithSubagentType_WritesAgentUsage" name="PostToolUse hook.PostToolUse_TaskCallWithSubagentType_WritesAgentUsage" time="0.0196" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="PostToolUse_OtherTool_WritesNothing" name="PostToolUse hook.PostToolUse_OtherTool_WritesNothing" time="0.013" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="PostToolUse_SkillWithoutName_WritesNothing" name="PostToolUse hook.PostToolUse_SkillWithoutName_WritesNothing" time="0.0127" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="PostToolUse_InsideClassifierChild_WritesNothing" name="PostToolUse hook.PostToolUse_InsideClassifierChild_WritesNothing" time="0.016" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Hooks.SessionEnd.Tests.ps1" executed="True" result="Success" success="True" time="0.8582" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Hooks.SessionEnd.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="SessionEnd hook" executed="True" result="Success" success="True" time="0.3156" asserts="0" description="SessionEnd hook">
+            <results>
+              <test-case description="SessionEnd_UnprocessedSession_WritesCorrectionFrustrationPraiseQuestionRecords" name="SessionEnd hook.SessionEnd_UnprocessedSession_WritesCorrectionFrustrationPraiseQuestionRecords" time="0.0943" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="SessionEnd_JournalWithoutOutcome_WritesAbandonmentRecord" name="SessionEnd hook.SessionEnd_JournalWithoutOutcome_WritesAbandonmentRecord" time="0.0628" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="SessionEnd_NoJournalAtAll_WritesAbandonmentRecord" name="SessionEnd hook.SessionEnd_NoJournalAtAll_WritesAbandonmentRecord" time="0.0587" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="SessionEnd_AlreadyProcessed_WritesNothing" name="SessionEnd hook.SessionEnd_AlreadyProcessed_WritesNothing" time="0.0228" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="SessionEnd_InsideClassifierChild_WritesNothing" name="SessionEnd hook.SessionEnd_InsideClassifierChild_WritesNothing" time="0.0243" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="SessionEnd_ClassifierFails_ExitsZeroAndLogsError" name="SessionEnd hook.SessionEnd_ClassifierFails_ExitsZeroAndLogsError" time="0.0349" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Collect-DailyFeedback" executed="True" result="Success" success="True" time="0.705" asserts="0" description="Collect-DailyFeedback">
+            <results>
+              <test-case description="CollectDaily_SkipsProcessedAndProcessesNew" name="Collect-DailyFeedback.CollectDaily_SkipsProcessedAndProcessesNew" time="0.175" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="CollectDaily_SecondRun_WritesNoDuplicateRecords" name="Collect-DailyFeedback.CollectDaily_SecondRun_WritesNoDuplicateRecords" time="0.2016" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Hooks.SessionStart.Tests.ps1" executed="True" result="Success" success="True" time="0.3183" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Hooks.SessionStart.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="SessionStart hook" executed="True" result="Success" success="True" time="0.1805" asserts="0" description="SessionStart hook">
+            <results>
+              <test-case description="SessionStart_Startup_PrintsMemoryAndThreeNewestJournals" name="SessionStart hook.SessionStart_Startup_PrintsMemoryAndThreeNewestJournals" time="0.0652" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="SessionStart_Startup_WritesSessionStateFile" name="SessionStart hook.SessionStart_Startup_WritesSessionStateFile" time="0.0261" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="SessionStart_Compact_PrintsMemoryOnly" name="SessionStart hook.SessionStart_Compact_PrintsMemoryOnly" time="0.023" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="SessionStart_InsideClassifierChild_PrintsNothingAndWritesNoState" name="SessionStart hook.SessionStart_InsideClassifierChild_PrintsNothingAndWritesNoState" time="0.0185" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="SessionStart_NoJournalsYet_StillPrintsMemory" name="SessionStart hook.SessionStart_NoJournalsYet_StillPrintsMemory" time="0.03" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Hooks.Stop.Tests.ps1" executed="True" result="Success" success="True" time="0.3369" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Hooks.Stop.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Stop hook" executed="True" result="Success" success="True" time="0.1979" asserts="0" description="Stop hook">
+            <results>
+              <test-case description="Stop_StopHookActive_ExitsZeroSilently" name="Stop hook.Stop_StopHookActive_ExitsZeroSilently" time="0.0267" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Stop_NoJournalForSession_EmitsBlockDecisionNamingTemplate" name="Stop hook.Stop_NoJournalForSession_EmitsBlockDecisionNamingTemplate" time="0.0223" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Stop_JournalOlderThanLastUserTurn_EmitsBlock" name="Stop hook.Stop_JournalOlderThanLastUserTurn_EmitsBlock" time="0.0297" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Stop_CurrentJournal_NoOutput" name="Stop hook.Stop_CurrentJournal_NoOutput" time="0.0257" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Stop_JournalForOtherSessionOnly_EmitsBlock" name="Stop hook.Stop_JournalForOtherSessionOnly_EmitsBlock" time="0.0304" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Stop_InsideClassifierChild_NeverBlocks" name="Stop hook.Stop_InsideClassifierChild_NeverBlocks" time="0.0207" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Stop_TranscriptMissing_RequiresJournalExistenceOnly" name="Stop hook.Stop_TranscriptMissing_RequiresJournalExistenceOnly" time="0.0232" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Hooks.UserPromptSubmit.Tests.ps1" executed="True" result="Success" success="True" time="0.3437" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Hooks.UserPromptSubmit.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="UserPromptSubmit hook" executed="True" result="Success" success="True" time="0.1885" asserts="0" description="UserPromptSubmit hook">
+            <results>
+              <test-case description="UserPromptSubmit_PlusOnly_WritesPositiveRating" name="UserPromptSubmit hook.UserPromptSubmit_PlusOnly_WritesPositiveRating" time="0.0364" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="UserPromptSubmit_MinusWithReason_WritesNegativeRatingWithReason" name="UserPromptSubmit hook.UserPromptSubmit_MinusWithReason_WritesNegativeRatingWithReason" time="0.0282" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="UserPromptSubmit_MinusOnly_WritesNegativeRatingWithoutReason" name="UserPromptSubmit hook.UserPromptSubmit_MinusOnly_WritesNegativeRatingWithoutReason" time="0.024" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="UserPromptSubmit_OrdinaryPrompt_WritesNothing" name="UserPromptSubmit hook.UserPromptSubmit_OrdinaryPrompt_WritesNothing" time="0.015" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="UserPromptSubmit_MinusOneDoctor_IsNotARating" name="UserPromptSubmit hook.UserPromptSubmit_MinusOneDoctor_IsNotARating" time="0.0144" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="UserPromptSubmit_PlusFollowedByText_IsNotARating" name="UserPromptSubmit hook.UserPromptSubmit_PlusFollowedByText_IsNotARating" time="0.0157" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="UserPromptSubmit_NoJournalYet_RefersToTranscript" name="UserPromptSubmit hook.UserPromptSubmit_NoJournalYet_RefersToTranscript" time="0.0245" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="UserPromptSubmit_InsideClassifierChild_WritesNothing" name="UserPromptSubmit hook.UserPromptSubmit_InsideClassifierChild_WritesNothing" time="0.015" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Hooks.Wiring.Tests.ps1" executed="True" result="Success" success="True" time="0.3062" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Hooks.Wiring.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="hooks.json" executed="True" result="Success" success="True" time="0.0719" asserts="0" description="hooks.json">
+            <results>
+              <test-case description="HooksJson_FiveEvents_EachCommandRunsPwshFileUnderPluginRootWithExpectedTimeout" name="hooks.json.HooksJson_FiveEvents_EachCommandRunsPwshFileUnderPluginRootWithExpectedTimeout" time="0.0285" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="HooksJson_PostToolUse_MatcherIsSkillAgentTask" name="hooks.json.HooksJson_PostToolUse_MatcherIsSkillAgentTask" time="0.0133" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="HooksJson_EveryReferencedHookScript_Exists" name="hooks.json.HooksJson_EveryReferencedHookScript_Exists" time="0.0136" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Hooks resolve the project from the hook input" executed="True" result="Success" success="True" time="0.1453" asserts="0" description="Hooks resolve the project from the hook input">
+            <results>
+              <test-case description="Hook_CwdInInput_UsedAsProjectRootWhenNoRepoRootParameter" name="Hooks resolve the project from the hook input.Hook_CwdInInput_UsedAsProjectRootWhenNoRepoRootParameter" time="0.0248" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Hook_NoRootResolvable_ExitsZeroWithoutOutput" name="Hooks resolve the project from the hook input.Hook_NoRootResolvable_ExitsZeroWithoutOutput" time="0.0132" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Hook_InternalError_AppendsHookErrorsLogUnderProjectStateAndExitsZero" name="Hooks resolve the project from the hook input.Hook_InternalError_AppendsHookErrorsLogUnderProjectStateAndExitsZero" time="0.0266" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Hook scripts are plugin-relative" executed="True" result="Success" success="True" time="0.1614" asserts="0" description="Hook scripts are plugin-relative">
+            <results>
+              <test-case description="Hooks_NoScript_ReferencesEvolutionLibOrParentParent" name="Hook scripts are plugin-relative.Hooks_NoScript_ReferencesEvolutionLibOrParentParent" time="0.0145" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Init.Tests.ps1" executed="True" result="Success" success="True" time="5.3255" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Init.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Initialize-Project on a fresh repository" executed="True" result="Success" success="True" time="0.7758" asserts="0" description="Initialize-Project on a fresh repository">
+            <results>
+              <test-case description="Init_FreshRepo_WritesProtectedBlockDutiesMemoryEvolutionTreeConfigAndGitignore" name="Initialize-Project on a fresh repository.Init_FreshRepo_WritesProtectedBlockDutiesMemoryEvolutionTreeConfigAndGitignore" time="0.0192" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Init_FreshRepo_Gen0InventoryListsEachAgentSkillCommandInstructionWithDescription" name="Initialize-Project on a fresh repository.Init_FreshRepo_Gen0InventoryListsEachAgentSkillCommandInstructionWithDescription" time="0.0138" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Init_FreshRepo_LineageHasGen0RowAndEvolveJsonListedInProtectedPaths" name="Initialize-Project on a fresh repository.Init_FreshRepo_LineageHasGen0RowAndEvolveJsonListedInProtectedPaths" time="0.0169" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Init_FreshRepo_EvolveJsonMainLineIsCurrentBranch" name="Initialize-Project on a fresh repository.Init_FreshRepo_EvolveJsonMainLineIsCurrentBranch" time="0.0104" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Init_NoTasks_WritesTwoSkeletonTasks" name="Initialize-Project on a fresh repository.Init_NoTasks_WritesTwoSkeletonTasks" time="0.0144" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Init_WithoutIncludeCi_WritesNoPipelineFile" name="Initialize-Project on a fresh repository.Init_WithoutIncludeCi_WritesNoPipelineFile" time="0.0092" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Init_Never_CommitsOrTags" name="Initialize-Project on a fresh repository.Init_Never_CommitsOrTags" time="0.1112" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Init_SecondRun_ChangesNoFileAndSaysAlreadyInitialised" name="Initialize-Project on a fresh repository.Init_SecondRun_ChangesNoFileAndSaysAlreadyInitialised" time="0.0641" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Initialize-Project refusals and reports" executed="True" result="Success" success="True" time="4.6047" asserts="0" description="Initialize-Project refusals and reports">
+            <results>
+              <test-case description="Init_NoClaudeMd_RefusesClaudeMdNotFound" name="Initialize-Project refusals and reports.Init_NoClaudeMd_RefusesClaudeMdNotFound" time="0.2767" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Init_ExistingProtectedBlock_NotAppendedAgainAndReportsProtectedBlockAlreadyPresent" name="Initialize-Project refusals and reports.Init_ExistingProtectedBlock_NotAppendedAgainAndReportsProtectedBlockAlreadyPresent" time="0.3825" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Init_ExistingBlockDifferentFromTemplate_ReportsDiffersKeptAsIs" name="Initialize-Project refusals and reports.Init_ExistingBlockDifferentFromTemplate_ReportsDiffersKeptAsIs" time="0.3849" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Init_NoClaudeFolder_WritesEmptyInventorySectionsAndWarns" name="Initialize-Project refusals and reports.Init_NoClaudeFolder_WritesEmptyInventorySectionsAndWarns" time="0.3306" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Init_ConstraintsProtectedPlacement_BlockContainsHardConstraintsBullet" name="Initialize-Project refusals and reports.Init_ConstraintsProtectedPlacement_BlockContainsHardConstraintsBullet" time="0.3541" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Init_ConstraintsDutiesPlacement_DutiesLineAddedAndBlockEqualsTemplate" name="Initialize-Project refusals and reports.Init_ConstraintsDutiesPlacement_DutiesLineAddedAndBlockEqualsTemplate" time="0.3463" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Init_ExistingTasks_KeepsThemAndWritesNoSkeletons" name="Initialize-Project refusals and reports.Init_ExistingTasks_KeepsThemAndWritesNoSkeletons" time="0.3637" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Init_IncludeCi_WritesPipelineTemplate" name="Initialize-Project refusals and reports.Init_IncludeCi_WritesPipelineTemplate" time="0.3496" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Init_SettingsWithStopHookCommand_WarnsDuplicateHook" name="Initialize-Project refusals and reports.Init_SettingsWithStopHookCommand_WarnsDuplicateHook" time="0.3327" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Init_PartiallyInitialisedProject_CreatesOnlyMissingArtifacts" name="Initialize-Project refusals and reports.Init_PartiallyInitialisedProject_CreatesOnlyMissingArtifacts" time="0.4436" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Initialize-Project on a project with its own protected block" executed="True" result="Success" success="True" time="5.0129" asserts="0" description="Initialize-Project on a project with its own protected block">
+            <results>
+              <test-case description="Init_ProjectWithCustomProtectedBlock_KeepsItByteIdenticalAndReportsDiffers" name="Initialize-Project on a project with its own protected block.Init_ProjectWithCustomProtectedBlock_KeepsItByteIdenticalAndReportsDiffers" time="0.3775" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="init skill" executed="True" result="Success" success="True" time="5.0322" asserts="0" description="init skill">
+            <results>
+              <test-case description="InitSkill_NeverCommitsWithoutConfirmation" name="init skill.InitSkill_NeverCommitsWithoutConfirmation" time="0.0155" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Lineage.Tests.ps1" executed="True" result="Success" success="True" time="9.16" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Lineage.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Add-LineageRow" executed="True" result="Success" success="True" time="0.0247" asserts="0" description="Add-LineageRow">
+            <results>
+              <test-case description="AddLineageRow_Reverted_AppendsWellFormedRow" name="Add-LineageRow.AddLineageRow_Reverted_AppendsWellFormedRow" time="0.0227" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Show-Generation" executed="True" result="Success" success="True" time="3.2053" asserts="0" description="Show-Generation">
+            <results>
+              <test-case description="ShowGeneration_PrintsLineageAndLatestNote" name="Show-Generation.ShowGeneration_PrintsLineageAndLatestNote" time="1.5736" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="ShowGeneration_SpecificGeneration_PrintsThatNote" name="Show-Generation.ShowGeneration_SpecificGeneration_PrintsThatNote" time="1.5193" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Revert-Generation" executed="True" result="Success" success="True" time="8.9045" asserts="0" description="Revert-Generation">
+            <results>
+              <test-case description="RevertGeneration_ExistingTag_RevertsCommitAndAppendsRevertedRow" name="Revert-Generation.RevertGeneration_ExistingTag_RevertsCommitAndAppendsRevertedRow" time="2.2984" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="RevertGeneration_UnknownGeneration_RefusesWithoutCommit" name="Revert-Generation.RevertGeneration_UnknownGeneration_RefusesWithoutCommit" time="1.6876" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="RevertGeneration_DirtyLineage_Refuses" name="Revert-Generation.RevertGeneration_DirtyLineage_Refuses" time="1.5797" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\PluginLayout.Tests.ps1" executed="True" result="Success" success="True" time="0.3881" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\PluginLayout.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Plugin manifest" executed="True" result="Success" success="True" time="0.0248" asserts="0" description="Plugin manifest">
+            <results>
+              <test-case description="PluginJson_Exists_NamesEvolveWithSemanticVersion" name="Plugin manifest.PluginJson_Exists_NamesEvolveWithSemanticVersion" time="0.0229" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Engine is project-agnostic" executed="True" result="Success" success="True" time="0.2203" asserts="0" description="Engine is project-agnostic">
+            <results>
+              <test-case description="Engine_NoScriptOrModule_UsesPSScriptRootParentParentAsProjectRoot" name="Engine is project-agnostic.Engine_NoScriptOrModule_UsesPSScriptRootParentParentAsProjectRoot" time="0.1038" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Engine_NoFile_ContainsRepositoryOrUserSpecificPaths" name="Engine is project-agnostic.Engine_NoFile_ContainsRepositoryOrUserSpecificPaths" time="0.057" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Engine_NoScriptHookOrTemplate_HardCodesTheDotnetBuildAllowList" name="Engine is project-agnostic.Engine_NoScriptHookOrTemplate_HardCodesTheDotnetBuildAllowList" time="0.0331" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Portability.Tests.ps1" executed="True" result="Success" success="True" time="0.3326" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Portability.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Path hygiene for Linux and macOS" executed="True" result="Success" success="True" time="0.0798" asserts="0" description="Path hygiene for Linux and macOS">
+            <results>
+              <test-case description="Engine_NoBackslashPathLiteral_InHooksScriptsOrTests" name="Path hygiene for Linux and macOS.Engine_NoBackslashPathLiteral_InHooksScriptsOrTests" time="0.0459" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Hooks_EveryScript_StartsWithPwshShebang" name="Path hygiene for Linux and macOS.Hooks_EveryScript_StartsWithPwshShebang" time="0.0211" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="GitAttributes_ForcesLfForScripts" name="Path hygiene for Linux and macOS.GitAttributes_ForcesLfForScripts" time="0.0111" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Resolve-ClaudeCommand" executed="True" result="Success" success="True" time="0.1138" asserts="0" description="Resolve-ClaudeCommand">
+            <results>
+              <test-case description="ResolveClaudeCommand_ExplicitCommand_ReturnedUnchanged" name="Resolve-ClaudeCommand.ResolveClaudeCommand_ExplicitCommand_ReturnedUnchanged" time="0.0093" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="ResolveClaudeCommand_ClaudeCliEnvSet_Wins" name="Resolve-ClaudeCommand.ResolveClaudeCommand_ClaudeCliEnvSet_Wins" time="0.0108" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="ResolveClaudeCommand_ExeFilter_OnlyOnWindows" name="Resolve-ClaudeCommand.ResolveClaudeCommand_ExeFilter_OnlyOnWindows" time="0.0117" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Distribution" executed="True" result="Success" success="True" time="0.1854" asserts="0" description="Distribution">
+            <results>
+              <test-case description="MarketplaceJson_ListsEvolvePluginWithOwnerAndSource" name="Distribution.MarketplaceJson_ListsEvolvePluginWithOwnerAndSource" time="0.0195" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="Workflow_RunsPesterOnWindowsAndUbuntuWithPwsh" name="Distribution.Workflow_RunsPesterOnWindowsAndUbuntuWithPwsh" time="0.0125" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="License_IsMit" name="Distribution.License_IsMit" time="0.019" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="ReadmeInstallSection_NamesMarketplaceAndPluginAndConfigKeys" name="Distribution.ReadmeInstallSection_NamesMarketplaceAndPluginAndConfigKeys" time="0.0187" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Regression.Tests.ps1" executed="True" result="Success" success="True" time="6.1674" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Regression.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Task files" executed="True" result="Success" success="True" time="0.0276" asserts="0" description="Task files">
+            <results>
+              <test-case description="Regression_TaskFilesOfScaffold_HaveIdPromptCheckExpect" name="Task files.Regression_TaskFilesOfScaffold_HaveIdPromptCheckExpect" time="0.0126" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="TestRegressionAnswer_ContainsAndNotContains_Evaluated" name="Task files.TestRegressionAnswer_ContainsAndNotContains_Evaluated" time="0.0105" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Invoke-Regression" executed="True" result="Success" success="True" time="5.5475" asserts="0" description="Invoke-Regression">
+            <results>
+              <test-case description="InvokeRegression_ShimAnswersAllTasks_ScoresTwoOfTwo" name="Invoke-Regression.InvokeRegression_ShimAnswersAllTasks_ScoresTwoOfTwo" time="0.5638" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="InvokeRegression_ShimFailsOne_ScoresOneOfTwoAndListsFailingId" name="Invoke-Regression.InvokeRegression_ShimFailsOne_ScoresOneOfTwoAndListsFailingId" time="0.5408" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="InvokeRegression_ScriptCheck_RunsSiblingCheckScriptInsideWorktree" name="Invoke-Regression.InvokeRegression_ScriptCheck_RunsSiblingCheckScriptInsideWorktree" time="1.0669" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="InvokeRegression_Always_RemovesWorktree" name="Invoke-Regression.InvokeRegression_Always_RemovesWorktree" time="0.5866" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="InvokeRegression_RunAsScriptFile_ScoresLikeInProcess" name="Invoke-Regression.InvokeRegression_RunAsScriptFile_ScoresLikeInProcess" time="2.0771" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="InvokeRegression_Never_ModifiesOwnerCheckout" name="Invoke-Regression.InvokeRegression_Never_ModifiesOwnerCheckout" time="0.6338" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\SessionFeedback.Tests.ps1" executed="True" result="Success" success="True" time="0.1852" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\SessionFeedback.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Invoke-SessionFeedback" executed="True" result="Success" success="True" time="0.053" asserts="0" description="Invoke-SessionFeedback">
+            <results>
+              <test-case description="InvokeSessionFeedback_RubricPath_DefaultsToPluginRubric" name="Invoke-SessionFeedback.InvokeSessionFeedback_RubricPath_DefaultsToPluginRubric" time="0.0476" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Transcript.Tests.ps1" executed="True" result="Success" success="True" time="0.2301" asserts="0" description="D:\Data\gv10141\Repos\Common\claude-evolve-plugin\tests\Transcript.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Read-Transcript" executed="True" result="Success" success="True" time="0.0206" asserts="0" description="Read-Transcript">
+            <results>
+              <test-case description="ReadTranscript_Fixture_SkipsUnparsableLinesAndKeepsUnknownTypes" name="Read-Transcript.ReadTranscript_Fixture_SkipsUnparsableLinesAndKeepsUnknownTypes" time="0.0189" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Get-UserTurns" executed="True" result="Success" success="True" time="0.0395" asserts="0" description="Get-UserTurns">
+            <results>
+              <test-case description="ReadTranscript_Fixture_ReturnsThreeUserTurnsAndIgnoresThinking" name="Get-UserTurns.ReadTranscript_Fixture_ReturnsThreeUserTurnsAndIgnoresThinking" time="0.0173" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Get-LastUserTimestamp" executed="True" result="Success" success="True" time="0.0809" asserts="0" description="Get-LastUserTimestamp">
+            <results>
+              <test-case description="GetLastUserTimestamp_Fixture_ReturnsTimestampOfLastOwnerPromptInUtc" name="Get-LastUserTimestamp.GetLastUserTimestamp_Fixture_ReturnsTimestampOfLastOwnerPromptInUtc" time="0.0276" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="GetLastUserTimestamp_MissingFile_ReturnsNull" name="Get-LastUserTimestamp.GetLastUserTimestamp_MissingFile_ReturnsNull" time="0.012" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>

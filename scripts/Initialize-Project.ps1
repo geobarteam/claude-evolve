@@ -5,7 +5,7 @@
 
 .DESCRIPTION
     Refuses when CLAUDE.md is missing. Otherwise creates only what is missing: the working-agent duties section
-    and the protected block in CLAUDE.md, MEMORY.md, the evolution/ tree (journal template, feedback folder,
+    and the protected block in CLAUDE.md, short- and long-term memory under memory/, the evolution/ tree (journal template, feedback folder,
     generated gen-0 inventory, lineage with a gen/0 row, both manifests, evolve.json, regression skeletons),
     the .gitignore entries and, with -IncludeCi, the Azure pipeline template. An existing protected block is
     never rewritten (BR-4: a difference from the template is reported). Never runs git add, commit or tag.
@@ -57,10 +57,18 @@ else {
     if ($difference) { Write-Output $difference }
 }
 
-# 2. Templates that copy verbatim.
+# 2. Memory: a project initialised before the brain model keeps its MEMORY.md bullets as long-term memories.
+$migrated = Convert-LegacyMemory -ProjectRoot $ProjectRoot
+if ($migrated -ge 0) {
+    Report "memory/long-term.md (migrated $migrated memory/memories from MEMORY.md)" 'created'
+    Write-Output 'warning: MEMORY.md is no longer read; delete it once memory/long-term/ looks right'
+}
+Report 'evolution/evolver/genome-paths.txt (memory paths)' (Add-MemoryManifestEntries -ProjectRoot $ProjectRoot)
+
+# 3. Templates that copy verbatim.
 foreach ($item in Copy-ProjectTemplates -ProjectRoot $ProjectRoot) { Report $item.Path $item.Status }
 
-# 3. Generated files: gen-0 inventory, lineage, config.
+# 4. Generated files: gen-0 inventory, lineage, config.
 $inventory = New-GenerationZeroNote -ProjectRoot $ProjectRoot
 if ($inventory.Warning) { Write-Output "warning: $($inventory.Warning)" }
 $gen0 = Join-Path $ProjectRoot 'evolution/generations/gen-0.md'
@@ -72,15 +80,15 @@ else {
 Report 'evolution/lineage.md' (New-LineageFile -ProjectRoot $ProjectRoot -Summary $inventory.Summary)
 Report 'evolution/evolve.json' (New-EvolveConfig -ProjectRoot $ProjectRoot)
 
-# 4. Regression skeletons (only when the project has no tasks yet).
+# 5. Regression skeletons (only when the project has no tasks yet).
 $skeletons = @(New-RegressionSkeletons -ProjectRoot $ProjectRoot)
 if ($skeletons.Count -eq 0) { Write-Output 'kept evolution/regression/tasks/ (existing tasks)' }
 foreach ($rel in $skeletons) { Report $rel 'created' }
 
-# 5. .gitignore entries.
+# 6. .gitignore entries.
 Report '.gitignore (evolution/.state/, evolution/labelled/)' (Add-GitignoreEntries -ProjectRoot $ProjectRoot)
 
-# 6. Optional CI template.
+# 7. Optional CI template.
 if ($IncludeCi) {
     $ci = Join-Path $ProjectRoot 'azure-pipeline-genome.yml'
     if (Test-Path -LiteralPath $ci) { Report 'azure-pipeline-genome.yml' 'kept' }
@@ -90,7 +98,7 @@ if ($IncludeCi) {
     }
 }
 
-# 7. Warnings about project hooks that duplicate the plugin's.
+# 8. Warnings about project hooks that duplicate the plugin's.
 foreach ($warning in Test-DuplicateHooks -ProjectRoot $ProjectRoot) { Write-Output "warning: $warning" }
 
 if ($created.Count -eq 0) { Write-Output 'already initialised; nothing changed' }

@@ -21,20 +21,22 @@ runner from the plugin and reports what happened. Run it from the project root.
 
 2. Report the outcome verbatim, whichever it is:
    - **COMMITTED gen/N** — read `evolution/generations/gen-N.md` and show the note (summary, score, every
-     `Change k:` with its `Why:`, `Retired`, `Declined to change`). Remind the owner that the commit is local and
+     `Change k:` with its `Why:`, `Remembered`, `Recalled`, `Forgotten`, `Retired`, `Declined to change`).
+     A generation is also a memory consolidation: short-term memory was compressed into long-term memory and
+     cleared, recalled memories were strengthened, unused ones decayed or were forgotten. Remind the owner that the commit is local and
      provisional for `settleAfterDays` days; `git revert gen/N` is the emergency exit, and the next run records
      reverts in the lineage.
    - **REJECTED** — show the score line and the `rejected` row appended to `evolution/lineage.md`
      (uncommitted; the owner decides whether to keep it).
    - **REFUSED** — show every `VIOLATION:` line or the uncommitted-path list. A refusal is the contract working,
      not a bug to route around.
-   - **nothing to evolve** — say so; the owner can pass `-Force`.
+   - **nothing to evolve** (no new journal entry and an empty short-term memory) — say so; the owner can pass `-Force`.
 
 3. Point at the log: `evolution/.state/evolver/<stamp>.log` and the evidence bundle beside it.
 
 ## Never
 
-- Never edit `CLAUDE.md`, `MEMORY.md`, skills, agents, `evolution/evolve.json` or anything under `evolution/`
+- Never edit `CLAUDE.md`, `memory/`, skills, agents, `evolution/evolve.json` or anything under `evolution/`
   from this skill; the runner is the only writer of a generation.
 - Never push, never delete tags, never re-run to "get a better score".
 - Never call the runner from a hook, a loop or a schedule.

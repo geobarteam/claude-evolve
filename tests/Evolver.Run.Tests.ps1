@@ -15,13 +15,13 @@ BeforeAll {
     function New-ShimProposal {
         # What the fake evolver "writes" into its worktree: three cited changes plus the generation note.
         param([string] $Root, [int] $Generation = 1)
-        $memory = [System.IO.File]::ReadAllText((Join-Path $Root 'MEMORY.md')) + "`n- **Evolved belief** (since: gen/$Generation). text`n"
+        $memory = [System.IO.File]::ReadAllText((Join-Path $Root '.claude/agents/helper.md')) + "`n- **Evolved belief** (since: gen/$Generation). text`n"
         $files = [ordered]@{
-            'MEMORY.md'                     = $memory
+            '.claude/agents/helper.md'                     = $memory
             'CLAUDE.md'                     = (Add-OutsideEdit -Root $Root)
             '.claude/skills/refit/SKILL.md' = "---`nname: refit`n---`nRefit skill, rewritten by the evolver"
             "evolution/generations/gen-$Generation.md" = (New-Note -Generation $Generation -Summary 'three evidence-backed changes' -Changes @(
-                    @{ Title = 'Add belief'; Files = @('MEMORY.md'); Why = 'evolution/journal/2026-09-22-0900.md: agent lacked it' },
+                    @{ Title = 'Add belief'; Files = @('.claude/agents/helper.md'); Why = 'evolution/journal/2026-09-22-0900.md: agent lacked it' },
                     @{ Title = 'Add instruction'; Files = @('CLAUDE.md'); Why = 'evolution/feedback/2026-09-22.jsonl frustration record' },
                     @{ Title = 'Rewrite refit skill'; Files = @('.claude/skills/refit/SKILL.md'); Why = 'transcript:s2#u3 correction' }))
         }
@@ -85,7 +85,7 @@ Describe 'Invoke-Evolver run mode' {
         [string] (@(Invoke-RepoGit -Path $script:Root -GitArgs @('log', '-1', '--format=%s')) | Select-Object -First 1) | Should -Be 'gen(1): three evidence-backed changes'
         [string] (@(Invoke-RepoGit -Path $script:Root -GitArgs @('log', '-1', '--format=%an')) | Select-Object -First 1) | Should -Be 'evolver'
         (Invoke-RepoGit -Path $script:Root -GitArgs @('tag', '--points-at', 'HEAD')) | Should -Contain 'gen/1'
-        (Invoke-RepoGit -Path $script:Root -GitArgs @('diff', '--name-only', 'HEAD~1', 'HEAD')) | Sort-Object | Should -Be (@('.claude/skills/refit/SKILL.md', 'CLAUDE.md', 'MEMORY.md', 'evolution/generations/gen-1.md', 'evolution/lineage.md') | Sort-Object)
+        (Invoke-RepoGit -Path $script:Root -GitArgs @('diff', '--name-only', 'HEAD~1', 'HEAD')) | Sort-Object | Should -Be (@('.claude/skills/refit/SKILL.md', 'CLAUDE.md', '.claude/agents/helper.md', 'evolution/generations/gen-1.md', 'evolution/lineage.md') | Sort-Object)
         (Get-Content (Join-Path $script:Root 'evolution/lineage.md'))[-1] | Should -Match '^\| gen/1 \| .* \| 2/2 \| provisional \| three evidence-backed changes \|$'
         Test-Path (Join-Path $script:Root 'evolution/.state/evolver') | Should -BeTrue -Because 'the run is logged'
         @(Invoke-RepoGit -Path $script:Root -GitArgs @('worktree', 'list')).Count | Should -Be 1

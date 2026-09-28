@@ -55,7 +55,7 @@ Describe 'Initialize-Project on a fresh repository' {
         $claude | Should -Match 'Correctability is terminal'
         $claude | Should -Not -Match '\{\{HARD_CONSTRAINTS\}\}'
         $claude.IndexOf('## Working agent duties') | Should -BeLessThan $claude.IndexOf('<!-- PROTECTED -->')
-        foreach ($rel in 'MEMORY.md', 'evolution/journal/TEMPLATE.md', 'evolution/feedback/.gitkeep', 'evolution/generations/gen-0.md', 'evolution/lineage.md', 'evolution/evolver/genome-paths.txt', 'evolution/evolver/protected-paths.txt', 'evolution/evolve.json', '.gitignore') {
+        foreach ($rel in 'memory/long-term.md', 'memory/short-term.md', 'evolution/journal/TEMPLATE.md', 'evolution/feedback/.gitkeep', 'evolution/generations/gen-0.md', 'evolution/lineage.md', 'evolution/evolver/genome-paths.txt', 'evolution/evolver/protected-paths.txt', 'evolution/evolve.json', '.gitignore') {
             Test-Path (Join-Path $script:Root $rel) | Should -BeTrue -Because "$rel is project state"
         }
         $ignore = Get-Content (Join-Path $script:Root '.gitignore') -Raw

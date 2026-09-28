@@ -17,6 +17,7 @@ Set-StrictMode -Version Latest
 Import-Module (Join-Path $PSScriptRoot 'Config.psm1')
 Import-Module (Join-Path $PSScriptRoot 'Transcript.psm1')
 Import-Module (Join-Path $PSScriptRoot 'HookInput.psm1')
+Import-Module (Join-Path $PSScriptRoot 'Memory.psm1')
 
 $script:Labels = @('correction', 'frustration', 'praise', 'question', 'none')
 $script:Weights = @{ frustration = 2; abandonment = 2; correction = 1; praise = 1; question = 1; none = 0 }
@@ -130,7 +131,7 @@ function New-ClassifierPrompt {
     $sb = [System.Text.StringBuilder]::new()
     [void] $sb.AppendLine((Get-Content -LiteralPath $RubricPath -Raw))
     [void] $sb.AppendLine()
-    [void] $sb.AppendLine('## MEMORY.md belief titles available to the agent')
+    [void] $sb.AppendLine('## Long-term memory titles available to the agent')
     if ($BeliefTitles.Count -eq 0) { [void] $sb.AppendLine('(none)') }
     foreach ($title in $BeliefTitles) { [void] $sb.AppendLine("- $title") }
     [void] $sb.AppendLine()
@@ -332,21 +333,12 @@ function Set-SessionProcessed {
 function Get-BeliefTitles {
     <#
     .SYNOPSIS
-        Bold titles of the bullets under "## Beliefs" in MEMORY.md.
+        Titles of the long-term memories listed in memory/long-term.md.
     #>
     [CmdletBinding()]
     param([Parameter(Mandatory)] [string] $RepoRoot)
 
-    $path = Join-Path $RepoRoot 'MEMORY.md'
-    if (-not (Test-Path -LiteralPath $path)) { return @() }
-
-    $inBeliefs = $false
-    $titles = foreach ($line in Get-Content -LiteralPath $path) {
-        if ($line -match '^##\s+(.*)$') { $inBeliefs = ($Matches[1].Trim() -eq 'Beliefs'); continue }
-        if ($inBeliefs -and $line -match '^\s*-\s+\*\*(.+?)\*\*') { $Matches[1] }
-    }
-
-    return @($titles)
+    return @(Get-LongTermIndex -RepoRoot $RepoRoot | ForEach-Object Title)
 }
 
 function Get-JournalOutcome {

@@ -16,6 +16,13 @@
   "classifier": {
     "model": "haiku"
   },
+  "memory": {
+    "maxLines": 200,
+    "maxBytes": 25600,
+    "decay": 0.5,
+    "forgetAfterCycles": 3,
+    "forgetBelow": 1
+  },
   "agentTrailerPattern": "^Co-Authored-By:\\s*Claude\\b",
   "mainLine": ""
 }

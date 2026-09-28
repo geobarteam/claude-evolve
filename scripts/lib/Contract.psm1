@@ -9,7 +9,8 @@
       - a changed path is outside evolution/evolver/genome-paths.txt (read from the BASE ref, so a proposal cannot widen it)
       - a changed path is inside evolution/evolver/protected-paths.txt (also read from the base)
       - any byte inside CLAUDE.md's <!-- PROTECTED --> block changed
-      - more than MaxEdits genome files changed (generation note and lineage.md do not count)
+      - more than MaxEdits genome files changed (generation note, lineage.md and memory/** do not count)
+      - memory/** changed and its shape is broken: a memory file over its limit, an index line without a file, a memory without an index line
       - the generation note is missing, or a "Change k:" block lacks a Why: citing evolution/journal/, evolution/feedback/ or transcript:
 
     Generation note contract (evolution/generations/gen-N.md):
@@ -27,9 +28,11 @@ Set-StrictMode -Version Latest
 
 Import-Module (Join-Path $PSScriptRoot 'Config.psm1')
 Import-Module (Join-Path $PSScriptRoot 'Genome.psm1')
+Import-Module (Join-Path $PSScriptRoot 'Memory.psm1')
 
 $script:EvidencePattern = 'evolution/journal/\S+|evolution/feedback/\S+|transcript:\S+'
 $script:BookkeepingPattern = '^(evolution/generations/[^/]+\.md|evolution/lineage\.md)$'
+$script:MemoryPattern = '^memory/'
 
 # Errors inside module functions must surface to the caller's try/catch (hooks log them and exit 0).
 $ErrorActionPreference = 'Stop'
@@ -151,9 +154,28 @@ function Test-GenomeContract {
         elseif (($baseBlock -replace "`r`n", "`n") -cne ($headBlock -replace "`r`n", "`n")) { $violations.Add('protected block of CLAUDE.md changed') }
     }
 
-    $genomeEdits = @($changed | Where-Object { $_ -notmatch $script:BookkeepingPattern -and (Test-PathInsideProject -Path $_) -and (Test-PathInManifest -Path $_ -Manifest $manifest.Genome) -and -not (Test-PathInManifest -Path $_ -Manifest $protected) })
+    $genomeEdits = @($changed | Where-Object { $_ -notmatch $script:BookkeepingPattern -and $_ -notmatch $script:MemoryPattern -and (Test-PathInsideProject -Path $_) -and (Test-PathInManifest -Path $_ -Manifest $manifest.Genome) -and -not (Test-PathInManifest -Path $_ -Manifest $protected) })
     if ($genomeEdits.Count -gt $MaxEdits) {
         $violations.Add("$($genomeEdits.Count) genome edit(s) exceed the budget of ${MaxEdits}: $($genomeEdits -join ', ')")
+    }
+
+    if (@($changed | Where-Object { $_ -match $script:MemoryPattern }).Count -gt 0) {
+        $limits = (Get-EvolveConfig -ProjectRoot $ProjectRoot).Memory
+        if ($Worktree) {
+            foreach ($v in Test-MemoryShape -Root $Worktree -Limits $limits) { $violations.Add($v) }
+        }
+        else {
+            $temp = Join-Path ([System.IO.Path]::GetTempPath()) ('evolve-memory-' + [guid]::NewGuid().ToString('N'))
+            try {
+                foreach ($rel in @(Invoke-ContractGit -RepoPath $RepoPath -GitArgs @('ls-tree', '-r', '--name-only', $Head, '--', 'memory'))) {
+                    $dest = Join-Path $temp $rel
+                    New-Item -ItemType Directory -Path (Split-Path $dest -Parent) -Force | Out-Null
+                    [System.IO.File]::WriteAllText($dest, (Get-RefFileContent -RepoPath $RepoPath -Ref $Head -Path $rel))
+                }
+                if (Test-Path -LiteralPath $temp) { foreach ($v in Test-MemoryShape -Root $temp -Limits $limits) { $violations.Add($v) } }
+            }
+            finally { Remove-Item -LiteralPath $temp -Recurse -Force -ErrorAction SilentlyContinue }
+        }
     }
 
     $notes = @($changed | Where-Object { $_ -match '^evolution/generations/gen-\d+\.md$' })
@@ -200,7 +222,7 @@ function Get-GenerationNote {
     if ($Text -match '(?m)^#\s*gen/(\d+)\s*(?:—|-|:)\s*(.*)$') { $generation = [int] $Matches[1]; $summary = $Matches[2].Trim() }
 
     $changes = [System.Collections.Generic.List[object]]::new()
-    foreach ($m in [regex]::Matches($Text, '(?ms)^Change (\d+):[ \t]*(.*?)$(.*?)(?=^Change \d+:|^Retired:|^Declined to change:|\z)')) {
+    foreach ($m in [regex]::Matches($Text, '(?ms)^Change (\d+):[ \t]*(.*?)$(.*?)(?=^Change \d+:|^Remembered:|^Forgotten:|^Retired:|^Declined to change:|\z)')) {
         $body = $m.Groups[3].Value
         $files = @()
         if ($body -match '(?m)^\s*Files:\s*(.+)$') { $files = @($Matches[1] -split '\s*,\s*' | ForEach-Object { $_.Trim() } | Where-Object { $_ }) }

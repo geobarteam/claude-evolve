@@ -25,7 +25,7 @@ function Set-ScaffoldFile {
 function New-ContractRepo {
     <#
         Repository on branch dev shaped like an initialised project: CLAUDE.md (duties + protected block from the
-        templates), MEMORY.md, both manifests, lineage.md with a gen/0 row, a minimal gen-0.md, evolve.json,
+        templates), both memory files, a helper agent, both manifests, lineage.md with a gen/0 row, a minimal gen-0.md, evolve.json,
         a dummy hook + settings, one skill, a src file, one journal, two simple regression tasks.
         One owner commit, tagged gen/0.
     #>
@@ -36,7 +36,9 @@ function New-ContractRepo {
 
     $block = (Get-Template 'protected-block.md') -replace '(?m)^\{\{HARD_CONSTRAINTS\}\}\r?\n', ''
     Set-ScaffoldFile -Root $Root -Rel 'CLAUDE.md' -Content ("# Test project`n`n" + (Get-Template 'duties.md') + "`n" + $block)
-    Set-ScaffoldFile -Root $Root -Rel 'MEMORY.md' -Content (Get-Template 'MEMORY.md')
+    Set-ScaffoldFile -Root $Root -Rel 'memory/long-term.md' -Content (Get-Template 'memory-long-term.md')
+    Set-ScaffoldFile -Root $Root -Rel 'memory/short-term.md' -Content (Get-Template 'memory-short-term.md')
+    Set-ScaffoldFile -Root $Root -Rel '.claude/agents/helper.md' -Content "---`nname: helper`n---`nHelper agent`n"
     Set-ScaffoldFile -Root $Root -Rel 'evolution/evolver/genome-paths.txt' -Content (Get-Template 'genome-paths.txt')
     Set-ScaffoldFile -Root $Root -Rel 'evolution/evolver/protected-paths.txt' -Content (Get-Template 'protected-paths.txt')
     Set-ScaffoldFile -Root $Root -Rel 'evolution/lineage.md' -Content ((Get-Template 'lineage.md') + "| gen/0 | 2026-09-21 | $PreviousScore | settled | baseline |`n")

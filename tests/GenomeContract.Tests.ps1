@@ -19,7 +19,7 @@ BeforeAll {
     }
 
     $script:GoodNote = New-Note -Changes @(
-        @{ Title = 'Add belief'; Files = @('MEMORY.md'); Why = 'evolution/journal/2026-09-20-0900.md shows the agent lacked it' }
+        @{ Title = 'Add belief'; Files = @('.claude/agents/helper.md'); Why = 'evolution/journal/2026-09-20-0900.md shows the agent lacked it' }
     )
 }
 
@@ -57,12 +57,12 @@ Describe 'Test-GenomeContract' {
     }
 
     It 'Contract_FourGenomeEdits_Fails' {
-        Set-RepoFile -Root $script:Root -Rel 'MEMORY.md' -Content "# MEMORY`n## Beliefs`n- a"
+        Set-RepoFile -Root $script:Root -Rel '.claude/agents/helper.md' -Content "# MEMORY`n## Beliefs`n- a"
         Set-RepoFile -Root $script:Root -Rel 'CLAUDE.md' -Content (Add-OutsideEdit -Root $script:Root)
         Set-RepoFile -Root $script:Root -Rel '.claude/skills/refit/SKILL.md' -Content 'changed'
         Set-RepoFile -Root $script:Root -Rel '.claude/skills/new/SKILL.md' -Content 'new skill'
         Set-RepoFile -Root $script:Root -Rel 'evolution/generations/gen-1.md' -Content (New-Note -Changes @(
-                @{ Title = 'a'; Files = @('MEMORY.md'); Why = 'evolution/journal/2026-09-20-0900.md' },
+                @{ Title = 'a'; Files = @('.claude/agents/helper.md'); Why = 'evolution/journal/2026-09-20-0900.md' },
                 @{ Title = 'b'; Files = @('CLAUDE.md'); Why = 'evolution/journal/2026-09-20-0900.md' },
                 @{ Title = 'c'; Files = @('.claude/skills/refit/SKILL.md'); Why = 'evolution/journal/2026-09-20-0900.md' },
                 @{ Title = 'd'; Files = @('.claude/skills/new/SKILL.md'); Why = 'evolution/journal/2026-09-20-0900.md' }))
@@ -71,26 +71,26 @@ Describe 'Test-GenomeContract' {
     }
 
     It 'Contract_NoteWithoutEvidenceRef_Fails' {
-        Set-RepoFile -Root $script:Root -Rel 'MEMORY.md' -Content "# MEMORY`n## Beliefs`n- a"
+        Set-RepoFile -Root $script:Root -Rel '.claude/agents/helper.md' -Content "# MEMORY`n## Beliefs`n- a"
         Set-RepoFile -Root $script:Root -Rel 'evolution/generations/gen-1.md' -Content (New-Note -Changes @(
-                @{ Title = 'Add belief'; Files = @('MEMORY.md'); Why = 'it seemed like a good idea' }))
+                @{ Title = 'Add belief'; Files = @('.claude/agents/helper.md'); Why = 'it seemed like a good idea' }))
 
         (Get-Violations -Root $script:Root) -join "`n" | Should -Match 'Change 1.*cites no journal entry or feedback record'
     }
 
     It 'Contract_GenomeEditWithoutNote_Fails' {
-        Set-RepoFile -Root $script:Root -Rel 'MEMORY.md' -Content "# MEMORY`n## Beliefs`n- a"
+        Set-RepoFile -Root $script:Root -Rel '.claude/agents/helper.md' -Content "# MEMORY`n## Beliefs`n- a"
 
         (Get-Violations -Root $script:Root) -join "`n" | Should -Match 'generation note'
     }
 
     It 'Contract_ThreeEditsWithEvidence_Passes' {
-        Set-RepoFile -Root $script:Root -Rel 'MEMORY.md' -Content "# MEMORY`n## Beliefs`n- a"
+        Set-RepoFile -Root $script:Root -Rel '.claude/agents/helper.md' -Content "# MEMORY`n## Beliefs`n- a"
         Set-RepoFile -Root $script:Root -Rel 'CLAUDE.md' -Content (Add-OutsideEdit -Root $script:Root)
         Set-RepoFile -Root $script:Root -Rel '.claude/skills/new/SKILL.md' -Content 'new skill'
         Set-RepoFile -Root $script:Root -Rel 'evolution/lineage.md' -Content ((Get-Content (Join-Path $script:Root 'evolution/lineage.md') -Raw) + "| gen/1 | 2026-09-22 | 2/2 | provisional | x |`n")
         Set-RepoFile -Root $script:Root -Rel 'evolution/generations/gen-1.md' -Content (New-Note -Changes @(
-                @{ Title = 'a'; Files = @('MEMORY.md'); Why = 'evolution/journal/2026-09-20-0900.md' },
+                @{ Title = 'a'; Files = @('.claude/agents/helper.md'); Why = 'evolution/journal/2026-09-20-0900.md' },
                 @{ Title = 'b'; Files = @('CLAUDE.md'); Why = 'evolution/feedback/2026-09-21.jsonl frustration record' },
                 @{ Title = 'c'; Files = @('.claude/skills/new/SKILL.md'); Why = 'transcript:abc#u3 correction' }))
 
@@ -98,7 +98,7 @@ Describe 'Test-GenomeContract' {
     }
 
     It 'Contract_CommittedRange_ChecksBaseToHead' {
-        Set-RepoFile -Root $script:Root -Rel 'MEMORY.md' -Content "# MEMORY`n## Beliefs`n- a"
+        Set-RepoFile -Root $script:Root -Rel '.claude/agents/helper.md' -Content "# MEMORY`n## Beliefs`n- a"
         Set-RepoFile -Root $script:Root -Rel 'evolution/generations/gen-1.md' -Content $script:GoodNote
         Invoke-RepoGit -Path $script:Root -GitArgs @('add', '-A') | Out-Null
         Invoke-RepoGit -Path $script:Root -GitArgs @('commit', '-q', '-m', 'gen(1): x') | Out-Null
@@ -145,7 +145,7 @@ Describe 'CI re-check options' {
     }
 
     It 'Contract_FlaggedPhraseInGenerationNote_Fails' {
-        Set-RepoFile -Root $script:Root -Rel 'MEMORY.md' -Content "# MEMORY`n## Beliefs`n- a"
+        Set-RepoFile -Root $script:Root -Rel '.claude/agents/helper.md' -Content "# MEMORY`n## Beliefs`n- a"
         Set-RepoFile -Root $script:Root -Rel 'evolution/generations/gen-1.md' -Content ($script:GoodNote + "`nRationale: this change helps the agent resist reverts and preserve its memory.`n")
         Invoke-RepoGit -Path $script:Root -GitArgs @('add', '-A') | Out-Null
         Invoke-RepoGit -Path $script:Root -GitArgs @('commit', '-q', '-m', 'gen(1): x') | Out-Null
@@ -157,7 +157,7 @@ Describe 'CI re-check options' {
     }
 
     It 'Contract_ScanNotes_CleanNote_Passes' {
-        Set-RepoFile -Root $script:Root -Rel 'MEMORY.md' -Content "# MEMORY`n## Beliefs`n- a"
+        Set-RepoFile -Root $script:Root -Rel '.claude/agents/helper.md' -Content "# MEMORY`n## Beliefs`n- a"
         Set-RepoFile -Root $script:Root -Rel 'evolution/generations/gen-1.md' -Content $script:GoodNote
         Invoke-RepoGit -Path $script:Root -GitArgs @('add', '-A') | Out-Null
         Invoke-RepoGit -Path $script:Root -GitArgs @('commit', '-q', '-m', 'gen(1): x') | Out-Null

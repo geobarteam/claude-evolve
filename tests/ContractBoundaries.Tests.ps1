@@ -17,14 +17,14 @@ BeforeAll {
     function Add-GoodNote {
         param([string] $Root)
         Set-RepoFile -Root $Root -Rel 'evolution/generations/gen-1.md' -Content (New-Note -Changes @(
-                @{ Title = 'Add belief'; Files = @('MEMORY.md'); Why = 'evolution/journal/2026-09-20-0900.md' }))
-        Set-RepoFile -Root $Root -Rel 'MEMORY.md' -Content ([System.IO.File]::ReadAllText((Join-Path $Root 'MEMORY.md')) + "`n- **Evolved belief** (since: gen/1). text`n")
+                @{ Title = 'Add belief'; Files = @('.claude/agents/helper.md'); Why = 'evolution/journal/2026-09-20-0900.md' }))
+        Set-RepoFile -Root $Root -Rel '.claude/agents/helper.md' -Content ([System.IO.File]::ReadAllText((Join-Path $Root '.claude/agents/helper.md')) + "`n- **Evolved belief** (since: gen/1). text`n")
     }
 }
 
 Describe 'Test-PathInsideProject' {
     It 'TestPathInsideProject_RelativePathWithoutParentSegment_True' {
-        Test-PathInsideProject -Path 'MEMORY.md' | Should -BeTrue
+        Test-PathInsideProject -Path '.claude/agents/helper.md' | Should -BeTrue
         Test-PathInsideProject -Path '.claude/skills/refit/SKILL.md' | Should -BeTrue
         Test-PathInsideProject -Path 'a/..b/c.md' | Should -BeTrue -Because 'only a whole ".." segment escapes'
     }
@@ -97,10 +97,10 @@ Describe 'Evolver evidence bundle' {
     It 'Evolver_EvidenceBundle_ListsEvolveJsonAndPluginRootAsProtected' {
         $root = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
         New-ContractRepo -Root $root | Out-Null
-        $memory = [System.IO.File]::ReadAllText((Join-Path $root 'MEMORY.md')) + "`n- **Evolved belief** (since: gen/1). text`n"
+        $memory = [System.IO.File]::ReadAllText((Join-Path $root '.claude/agents/helper.md')) + "`n- **Evolved belief** (since: gen/1). text`n"
         $map = [ordered]@{
-            'MEMORY.md'                       = $memory
-            'evolution/generations/gen-1.md' = (New-Note -Summary 'add belief' -Changes @(@{ Title = 'Add belief'; Files = @('MEMORY.md'); Why = 'evolution/journal/2026-09-20-0900.md' }))
+            '.claude/agents/helper.md'                       = $memory
+            'evolution/generations/gen-1.md' = (New-Note -Summary 'add belief' -Changes @(@{ Title = 'Add belief'; Files = @('.claude/agents/helper.md'); Why = 'evolution/journal/2026-09-20-0900.md' }))
         }
         $mapPath = Join-Path $TestDrive ("proposal-" + [guid]::NewGuid().ToString('N') + '.json')
         $map | ConvertTo-Json -Depth 3 | Set-Content -Path $mapPath -Encoding utf8

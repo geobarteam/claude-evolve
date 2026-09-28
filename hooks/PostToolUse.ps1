@@ -2,12 +2,14 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-    PostToolUse hook: counts skill and sub-agent invocations as "usage" feedback records.
+    PostToolUse hook: counts skill and sub-agent invocations as "usage" and long-term memory reads as "recall" records.
 
 .DESCRIPTION
     Protected file. Wired in .claude/settings.json with matcher "Skill|Agent|Task". Never blocks, prints nothing.
     Records { signal: usage, value: <skill name | agent type>, kind: skill | agent }. The evolver aggregates
     usage per week to find skills and agents unused for 30 days (retirement candidates).
+    With matcher "Read", a read of memory/long-term/<slug>.md records { signal: recall, value: memory/long-term/<slug>.md };
+    consolidation strengthens the memories that were recalled and lets the others decay (scripts/lib/Memory.psm1).
 #>
 [CmdletBinding()]
 param(
@@ -18,6 +20,7 @@ param(
 $ErrorActionPreference = 'Stop'
 Import-Module "$PSScriptRoot/../scripts/lib/HookInput.psm1" -Force
 Import-Module "$PSScriptRoot/../scripts/lib/Feedback.psm1" -Force
+Import-Module "$PSScriptRoot/../scripts/lib/Memory.psm1" -Force
 
 if (Test-HookSuppressed) { exit 0 }
 
@@ -34,6 +37,14 @@ try {
             $kind = 'skill'
             $name = [string] (Get-HookProperty -Object $toolInput -Name 'skill' -Default '')
         }
+        'Read' {
+            $filePath = [string] (Get-HookProperty -Object $toolInput -Name 'file_path' -Default '')
+            if ($filePath) {
+                $root = Resolve-RepoRoot -RepoRoot $RepoRoot -HookInput $hookInput
+                $rel = ConvertTo-MemoryRelativePath -Path $filePath -RepoRoot $root
+                if ($rel) { $kind = 'memory'; $name = $rel }
+            }
+        }
         { $_ -in @('Agent', 'Task') } {
             $kind = 'agent'
             $name = [string] (Get-HookProperty -Object $toolInput -Name 'subagent_type' -Default '')
@@ -46,6 +57,11 @@ try {
     $sessionId = [string] (Get-HookProperty -Object $hookInput -Name 'session_id' -Default 'unknown-session')
     $toolUseId = [string] (Get-HookProperty -Object $hookInput -Name 'tool_use_id' -Default '')
     $ref = if ($toolUseId) { "transcript:$sessionId#$toolUseId" } else { "transcript:$sessionId" }
+
+    if ($kind -eq 'memory') {
+        Write-FeedbackRecord -RepoRoot $root -SessionId $sessionId -Signal 'recall' -Value $name -Ref $ref
+        exit 0
+    }
 
     Write-FeedbackRecord -RepoRoot $root -SessionId $sessionId -Signal 'usage' -Value $name.Trim() -Ref $ref -Extra @{
         kind = $kind

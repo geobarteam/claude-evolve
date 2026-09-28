@@ -1,13 +1,14 @@
 # evolve — a self-evolving Claude Code agent, as a plugin
 
-The coding agent in a project improves between sessions the way a single organism does: it keeps a journal,
-its work produces feedback, and **on your request** an evolver proposes a small, evidence-backed change to the
-agent's instructions, beliefs, skills and sub-agents (its **genome**). You select by using the agent, by
-correcting it, and by reverting a generation when it goes wrong. Nothing runs on a schedule; nothing is ever
-pushed by the tooling.
+The coding agent in a project improves between sessions in two ways. Its **memory** works like a brain's: it
+notes what it learns in a short-term memory, and each consolidation keeps what matters in a long-term memory
+that strengthens with use and forgets what is never recalled. Its **instructions, skills and sub-agents** (its
+genome) evolve: it keeps a journal, its work produces feedback, and **on your request** an evolver proposes a
+small, evidence-backed change. You select by using the agent, by correcting it, and by reverting a generation
+when it goes wrong. Nothing runs on a schedule; nothing is ever pushed by the tooling.
 
 This repository is the **engine**, versioned once and installed as a Claude Code plugin. Each project keeps its
-own **state** in its own git history: the protected block and duties in `CLAUDE.md`, `MEMORY.md`, journal,
+own **state** in its own git history: the protected block and duties in `CLAUDE.md`, `memory/`, journal,
 feedback, generations, lineage, manifests, regression tasks and `evolution/evolve.json`.
 
 ## Prerequisites
@@ -51,7 +52,8 @@ pipeline template — then runs `scripts/Initialize-Project.ps1`, which creates 
 | Artifact | Purpose |
 | --- | --- |
 | `CLAUDE.md` — duties section + protected block | what the agent must do every session; what the evolver may never change |
-| `MEMORY.md` | project beliefs, edited only through the journal |
+| `memory/short-term.md` | working memory: the agent notes what it learns during sessions |
+| `memory/long-term.md`, `memory/long-term/` | long-term memory: an index of cues plus one file per memory, written only by consolidation |
 | `evolution/journal/TEMPLATE.md`, `evolution/feedback/` | evidence, one journal per session, one feedback file per day |
 | `evolution/generations/gen-0.md`, `evolution/lineage.md` | inventory of the genome and one row per generation |
 | `evolution/evolver/genome-paths.txt`, `protected-paths.txt` | what a generation may touch, what it may never touch |
@@ -66,7 +68,9 @@ and the `gen/0` tag afterwards and runs them only after your explicit yes.
 
 | You | The tooling |
 | --- | --- |
-| Work with Claude Code as usual | `SessionStart` injects `MEMORY.md` and the last three journal entries |
+| Work with Claude Code as usual | `SessionStart` injects the long-term index, the short-term memory and the last three journal entries |
+| Nothing | the agent notes durable facts in `memory/short-term.md`; `Stop` asks it to compress that file when it is over its limit |
+| Nothing | every read of a `memory/long-term/*.md` file is recorded as a `recall` (`PostToolUse`) |
 | Correct, refuse, praise in plain words | recorded verbatim at session end as `correction`, `frustration`, `praise`, `question` |
 | Type `+` or `- <reason>` as a prompt when you feel like rating | recorded as a `rating` (`+ text` and `-1 …` are ordinary prompts) |
 | Edit or revert code the agent wrote, or add `#agent-good` / `#agent-bad: reason` to a commit message | recorded by `/evolve:collect` from git (agent commits carry the `Co-Authored-By: Claude …` trailer) |
@@ -76,25 +80,62 @@ Everything lands in `evolution/feedback/<date>.jsonl` and `evolution/journal/`, 
 Run `/evolve:collect` once in a while (or before evolving) to catch sessions whose window was closed without a
 session-end event; it prints which transcript folder it scans.
 
+## Memory: short-term, long-term, consolidation
+
+| | Short-term (`memory/short-term.md`) | Long-term (`memory/long-term.md` + `memory/long-term/<slug>.md`) |
+| --- | --- | --- |
+| Holds | notes since the last consolidation: facts, conventions, gotchas, corrections of a long-term memory | durable memories; the index line is the cue, the file is the memory |
+| Written by | the working agent, during sessions | consolidation only (and you) |
+| Loaded | in full at session start | the index at session start; a memory file when the agent reads it |
+| Limit | 200 lines / 25 KB | the index: 200 lines / 25 KB |
+
+The limits are the ones Claude Code applies to its own memory index (the first 200 lines or 25 KB are loaded,
+whichever comes first); anything beyond them is cut at session start. They are configurable under `memory`
+in `evolve.json`.
+
+Every read of a long-term memory file counts as a **recall**. Each memory file carries its counters in its
+frontmatter: `since`, `recalls`, `last_recalled`, `strength`, `idle_cycles`. At each `/evolve:propose`,
+consolidation runs like sleep:
+
+1. **Strengthen and decay** (script): `strength = strength × decay + recalls since the last generation`. A
+   recalled memory resets `idle_cycles` to 0; the others add one. A memory idle for `forgetAfterCycles` cycles
+   whose strength fell below `forgetBelow` is forgotten (its file and index line are removed).
+2. **Compress** (model): each short-term note is kept (new memory or merged into an existing one),
+   used to correct or delete a wrong memory, or dropped. The note lists these under `Remembered:`.
+3. **Clean up** (script): new memories get their counters (strength 1). While the index is over its limit,
+   the weakest older memories are forgotten. Short-term memory is cleared; whatever was not carried over is forgotten.
+
+Memory changes are committed in the generation, do not count against `maxEdits`, and are checked by the
+contract (limits, every index line has a file, every file has an index line). The note lists `Recalled:` and
+`Forgotten:`. Reverting the generation brings forgotten memories back.
+
+A project initialised before this memory model keeps its `MEMORY.md` until `/evolve:init` is run again, which
+turns every bullet into a long-term memory and adds the memory paths to the genome manifest. Delete `MEMORY.md`
+afterwards; nothing reads it any more.
+
 ## Asking for a generation: `/evolve:propose`
 
 What one run does, in order:
 
 1. **Bookkeeping**: records any `git revert gen/N` you made as a `reverted` lineage row, marks generations older
    than `settleAfterDays` days `settled`, commits those rows as `lineage: …`.
-2. **Stops** if no journal entry is newer than the last generation (`-Force` overrides).
-3. **Evidence bundle**: lineage, journals since the last generation, feedback records, usage counts, git history
-   of the genome, agent commits, inventory, `MEMORY.md`. Saved under `evolution/.state/evolver/<stamp>-evidence.md`.
-4. **Proposal**: a headless model call inside a disposable worktree, with the project's hooks silenced, tools
-   limited to read and edit, and a budget cap. It edits at most `maxEdits` genome files and writes
-   `evolution/generations/gen-N.md`.
-5. **Contract**: only genome paths; no protected path, no byte of the protected block in `CLAUDE.md`, never
+2. **Stops** if no journal entry is newer than the last generation and short-term memory is empty (`-Force` overrides).
+3. **Consolidation, step 1**: in a disposable worktree holding your current short-term memory, recalls
+   strengthen the memories that were read and the others decay (see *Memory* above).
+4. **Evidence bundle**: lineage, journals since the last generation, feedback records, usage and recall counts,
+   git history of the genome, agent commits, inventory, both memories. Saved under
+   `evolution/.state/evolver/<stamp>-evidence.md`.
+5. **Proposal**: a headless model call inside that worktree, with the project's hooks silenced, tools
+   limited to read and edit, and a budget cap. It compresses short-term into long-term memory, edits at most
+   `maxEdits` genome files outside `memory/` and writes `evolution/generations/gen-N.md`. Consolidation step 3
+   then runs (counters, capacity forgetting, short-term memory cleared).
+6. **Contract**: only genome paths; memory within its limits and consistent; no protected path, no byte of the protected block in `CLAUDE.md`, never
    `evolution/evolve.json`, never the plugin folder, never a path outside the project; budget respected; every
    change cites a journal entry or feedback record. Any violation → `REFUSED`, nothing committed.
-6. **Regression**: the candidate is scored against every task in `evolution/regression/tasks/`. Score below the
+7. **Regression**: the candidate is scored against every task in `evolution/regression/tasks/`. Score below the
    last lineage score → the last change is dropped and scored once more; still lower → `REJECTED`, a `rejected`
    row is appended to `evolution/lineage.md` (uncommitted), nothing committed.
-7. **Commit**: `gen(N): <summary>` by the evolver identity from `evolve.json`, touching only the changed genome
+8. **Commit**: `gen(N): <summary>` by the evolver identity from `evolve.json`, touching only the changed genome
    files, the note and the lineage, tagged `gen/N`, **local only**. You push when you want.
 
 Cost per run: one proposal call plus one regression call per task (twice if a change is dropped). The log is
@@ -104,7 +145,8 @@ commit), `-Model <name>`, `-ProposalDir <folder>` (commit a proposal you wrote y
 ## Reading and undoing: `/evolve:show`, `/evolve:revert`
 
 `/evolve:show` (or `/evolve:show 3`) prints the lineage and a generation note: each change with its `Files:`,
-`Why:` (the evidence) and `Risk:`, what was retired, what the evolver declined to change. Status is
+`Why:` (the evidence) and `Risk:`, what was remembered, recalled and forgotten, what was retired, what the
+evolver declined to change. Status is
 `provisional` for `settleAfterDays` days, then `settled`; or `reverted`, `rejected`.
 
 `/evolve:revert 3` asks you to confirm, then runs `git revert gen/3` with **your** identity, appends the
@@ -124,7 +166,10 @@ Written by `/evolve:init`, committed with the project, protected from the evolve
 | `transcriptDir` | derived from the project path with Claude Code's folder encoding | where session transcripts live |
 | `maxEdits` | 3 | genome edit budget per generation |
 | `settleAfterDays` | 14 | provisional → settled |
-| `retireAfterDays` | 30 | retirement candidates for unused skills and beliefs |
+| `retireAfterDays` | 30 | retirement candidates for unused skills and sub-agents |
+| `memory.maxLines` / `memory.maxBytes` | 200 / 25600 | limit of each memory file (short-term, long-term index) |
+| `memory.decay` | 0.5 | share of a memory's strength kept per consolidation |
+| `memory.forgetAfterCycles` / `memory.forgetBelow` | 3 / 1 | a memory idle this many cycles below this strength is forgotten |
 | `regression.model` / `proposal.model` / `classifier.model` | `sonnet` / `sonnet` / `haiku` | models per role |
 | `regression.allowedTools` | `Read,Glob,Grep,Edit,Write` | add the project's build command, e.g. `Bash(dotnet build *)` |
 | `proposal.maxBudgetUsd` | 3 | budget cap per proposal call |
@@ -176,7 +221,7 @@ CI (`.github/workflows/pester.yml`) runs the suite on Windows and Ubuntu on ever
 .claude-plugin/plugin.json, marketplace.json   plugin manifest; this repository is its own marketplace
 hooks/                          SessionStart, Stop, SessionEnd, UserPromptSubmit, PostToolUse (hooks.json + .ps1)
 skills/<name>/SKILL.md          /evolve:init, propose, show, revert, collect, score
-scripts/lib/*.psm1              Config, Init, Genome, Contract, Feedback, GitSignals, HookInput, Regression, Transcript, Worktree
+scripts/lib/*.psm1              Config, Init, Genome, Contract, Memory, Feedback, GitSignals, HookInput, Regression, Transcript, Worktree
 scripts/evolver/                Invoke-Evolver, Test-GenomeContract, Show-Generation, Revert-Generation, prompt.md, rubric.md
 scripts/regression/             Invoke-Regression
 scripts/feedback/               Collect-DailyFeedback

@@ -1,5 +1,5 @@
 {
-  "description": "evolve: journal + feedback hooks. Every hook resolves the project from CLAUDE_PROJECT_DIR or the hook input's cwd, never from the plugin folder; internal errors go to <project>/evolution/.state/hook-errors.log and the hook exits 0.",
+  "description": "evolve: journal, memory and feedback hooks. Every hook resolves the project from CLAUDE_PROJECT_DIR or the hook input's cwd, never from the plugin folder; internal errors go to <project>/evolution/.state/hook-errors.log and the hook exits 0.",
   "hooks": {
     "SessionStart": [
       {
@@ -51,6 +51,17 @@
         "hooks": [
           {
             "type": "command",
+            "command": "pwsh -NoProfile -NonInteractive -File \"${CLAUDE_PLUGIN_ROOT}/hooks/PostToolUse.ps1\"",
+            "timeout": 20
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Read(**/memory/long-term/**)",
             "command": "pwsh -NoProfile -NonInteractive -File \"${CLAUDE_PLUGIN_ROOT}/hooks/PostToolUse.ps1\"",
             "timeout": 20
           }

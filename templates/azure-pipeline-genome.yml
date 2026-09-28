@@ -20,7 +20,7 @@ trigger:
   paths:
     include:
       - CLAUDE.md
-      - MEMORY.md
+      - memory/*
       - .claude/*
       - evolution/*
 

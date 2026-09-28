@@ -9,7 +9,8 @@ BeforeAll {
     function New-FakeProject {
         param([string] $Root)
         New-Item -ItemType Directory -Path (Join-Path $Root 'evolution/journal') -Force | Out-Null
-        Set-Content -Path (Join-Path $Root 'MEMORY.md') -Value "# MEMORY`n`n## Beliefs`n`n- **Gate belief** (since: gen/0). visible`n"
+        New-Item -ItemType Directory -Path (Join-Path $Root 'memory') -Force | Out-Null
+        Set-Content -Path (Join-Path $Root 'memory/long-term.md') -Value "# Long-term memory`n`n- [Gate belief](long-term/gate-belief.md) — visible`n"
         Set-Content -Path (Join-Path $Root 'evolution/journal/TEMPLATE.md') -Value '<!-- session: {{session_id}} -->'
         Set-Content -Path (Join-Path $Root 'evolution/journal/2026-09-21-1300.md') -Value "<!-- session: sess-wire -->`n## Task`nx"
     }
@@ -37,16 +38,21 @@ Describe 'hooks.json' {
         $script:Wiring | Should -Not -BeNullOrEmpty -Because 'hooks/hooks.json wires the plugin hooks'
         foreach ($event in $script:Expected.Keys) {
             $entries = @($script:Wiring.hooks.$event)
-            $entries.Count | Should -Be 1 -Because "$event has one entry"
-            $hook = $entries[0].hooks[0]
-            $hook.type | Should -Be 'command'
-            $hook.command | Should -Be "pwsh -NoProfile -NonInteractive -File `"`${CLAUDE_PLUGIN_ROOT}/hooks/$event.ps1`""
-            $hook.timeout | Should -Be $script:Expected[$event]
+            $expectedCount = if ($event -eq 'PostToolUse') { 2 } else { 1 }
+            $entries.Count | Should -Be $expectedCount -Because "$event has $expectedCount entry/entries"
+            foreach ($entry in $entries) {
+                $hook = $entry.hooks[0]
+                $hook.type | Should -Be 'command'
+                $hook.command | Should -Be "pwsh -NoProfile -NonInteractive -File `"`${CLAUDE_PLUGIN_ROOT}/hooks/$event.ps1`""
+                $hook.timeout | Should -Be $script:Expected[$event]
+            }
         }
     }
 
-    It 'HooksJson_PostToolUse_MatcherIsSkillAgentTask' {
+    It 'HooksJson_PostToolUse_MatcherIsSkillAgentTaskThenMemoryReads' {
         @($script:Wiring.hooks.PostToolUse)[0].matcher | Should -Be 'Skill|Agent|Task'
+        @($script:Wiring.hooks.PostToolUse)[1].matcher | Should -Be 'Read'
+        @($script:Wiring.hooks.PostToolUse)[1].hooks[0].if | Should -Be 'Read(**/memory/long-term/**)'
         foreach ($event in 'SessionStart', 'Stop', 'SessionEnd', 'UserPromptSubmit') {
             @($script:Wiring.hooks.$event)[0].PSObject.Properties.Name | Should -Not -Contain 'matcher'
         }

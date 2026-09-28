@@ -5,7 +5,7 @@
 
 .DESCRIPTION
     Protected file. Prints every owner prompt with the agent action that preceded it and asks for a label:
-      c = correction, f = frustration, p = praise, q = question (answer was in MEMORY.md/codebase), n = none, s = skip rest
+      c = correction, f = frustration, p = praise, q = question (answer was in long-term memory/codebase), n = none, s = skip rest
     Labels go to evolution/labelled/<session_id>.labels.jsonl (gitignored; real transcripts stay local).
     Run Test-ClassifierAgreement.ps1 afterwards. The spec's gate is >= 80 % agreement over >= 30 sessions.
 

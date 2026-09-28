@@ -32,9 +32,9 @@ BeforeAll {
 
     function New-GoodProposal {
         param([string] $Root)
-        $memory = [System.IO.File]::ReadAllText((Join-Path $Root 'MEMORY.md')) + "`n- **Evolved belief** (since: gen/1). text`n"
-        New-Proposal -Dir (Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))) -Files @{ 'MEMORY.md' = $memory } -Note (New-Note -Summary 'add evolved belief' -Changes @(
-                @{ Title = 'Add evolved belief'; Files = @('MEMORY.md'); Why = 'evolution/journal/2026-09-20-0900.md: agent lacked it' }))
+        $memory = [System.IO.File]::ReadAllText((Join-Path $Root '.claude/agents/helper.md')) + "`n- **Evolved belief** (since: gen/1). text`n"
+        New-Proposal -Dir (Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))) -Files @{ '.claude/agents/helper.md' = $memory } -Note (New-Note -Summary 'add evolved belief' -Changes @(
+                @{ Title = 'Add evolved belief'; Files = @('.claude/agents/helper.md'); Why = 'evolution/journal/2026-09-20-0900.md: agent lacked it' }))
     }
 }
 
@@ -54,10 +54,10 @@ Describe 'Invoke-Evolver commit contract' {
         [string] (@(Invoke-RepoGit -Path $script:Root -GitArgs @('log', '-1', '--format=%s')) | Select-Object -First 1) | Should -Be 'gen(1): add evolved belief'
         (Invoke-RepoGit -Path $script:Root -GitArgs @('log', '-1', '--format=%B')) -join "`n" | Should -Match 'Score: 2/2 \(prev —\)'
         (Invoke-RepoGit -Path $script:Root -GitArgs @('tag', '--points-at', 'HEAD')) | Should -Contain 'gen/1'
-        (Invoke-RepoGit -Path $script:Root -GitArgs @('diff', '--name-only', 'gen/0', 'HEAD')) | Sort-Object | Should -Be (@('MEMORY.md', 'evolution/generations/gen-1.md', 'evolution/lineage.md') | Sort-Object)
+        (Invoke-RepoGit -Path $script:Root -GitArgs @('diff', '--name-only', 'gen/0', 'HEAD')) | Sort-Object | Should -Be (@('.claude/agents/helper.md', 'evolution/generations/gen-1.md', 'evolution/lineage.md') | Sort-Object)
         (Get-Content (Join-Path $script:Root 'evolution/lineage.md'))[-1] | Should -Match '^\| gen/1 \| .* \| 2/2 \| provisional \| add evolved belief \|$'
         Get-Content (Join-Path $script:Root 'evolution/generations/gen-1.md') -Raw | Should -Match 'Score: 2/2 \(prev —\)'
-        Get-Content (Join-Path $script:Root 'MEMORY.md') -Raw | Should -Match 'Evolved belief'
+        Get-Content (Join-Path $script:Root '.claude/agents/helper.md') -Raw | Should -Match 'Evolved belief'
         (Invoke-RepoGit -Path $script:Root -GitArgs @('status', '--porcelain')) | Should -BeNullOrEmpty
     }
 
@@ -73,10 +73,10 @@ Describe 'Invoke-Evolver commit contract' {
         $script:Root = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
         $base = New-ContractRepo -Root $script:Root -PreviousScore '2/2'
         $log = Join-Path $TestDrive ([guid]::NewGuid().ToString('N') + '.log')
-        $memory = [System.IO.File]::ReadAllText((Join-Path $script:Root 'MEMORY.md')) + "`n- **Evolved belief** (since: gen/1). text`n"
+        $memory = [System.IO.File]::ReadAllText((Join-Path $script:Root '.claude/agents/helper.md')) + "`n- **Evolved belief** (since: gen/1). text`n"
         $skill = "---`nname: refit`n---`nRefit skill, rewritten"
-        $proposal = New-Proposal -Dir (Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))) -Files @{ 'MEMORY.md' = $memory; '.claude/skills/refit/SKILL.md' = $skill } -Note (New-Note -Summary 'two changes' -Changes @(
-                @{ Title = 'Add belief'; Files = @('MEMORY.md'); Why = 'evolution/journal/2026-09-20-0900.md' },
+        $proposal = New-Proposal -Dir (Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))) -Files @{ '.claude/agents/helper.md' = $memory; '.claude/skills/refit/SKILL.md' = $skill } -Note (New-Note -Summary 'two changes' -Changes @(
+                @{ Title = 'Add belief'; Files = @('.claude/agents/helper.md'); Why = 'evolution/journal/2026-09-20-0900.md' },
                 @{ Title = 'Rewrite refit skill'; Files = @('.claude/skills/refit/SKILL.md'); Why = 'evolution/journal/2026-09-20-0900.md' }))
 
         $r = Invoke-EvolverCommit -Root $script:Root -ProposalDir $proposal -AnswerFile (New-Answers -Answered @('alpha')) -ShimLog $log
@@ -87,7 +87,7 @@ Describe 'Invoke-Evolver commit contract' {
         @(Get-Content $log).Count | Should -Be 4 -Because 'two regression runs of two tasks: first attempt and one retry'
         [string] (@(Invoke-RepoGit -Path $script:Root -GitArgs @('rev-parse', 'HEAD')) | Select-Object -First 1) | Should -Be $base -Because 'no generation commit'
         (Invoke-RepoGit -Path $script:Root -GitArgs @('tag', '-l', 'gen/1')) | Should -BeNullOrEmpty
-        Get-Content (Join-Path $script:Root 'MEMORY.md') -Raw | Should -Not -Match 'Evolved belief' -Because 'the owner checkout is untouched'
+        Get-Content (Join-Path $script:Root '.claude/agents/helper.md') -Raw | Should -Not -Match 'Evolved belief' -Because 'the owner checkout is untouched'
         (Get-Content (Join-Path $script:Root 'evolution/lineage.md'))[-1] | Should -Match '^\| — \| .* \| 1/2 \| rejected \| .*two changes.*\|$'
     }
 
@@ -104,13 +104,13 @@ Describe 'Invoke-Evolver commit contract' {
     }
 
     It 'Evolver_OwnerHasUncommittedGenomeChanges_RefusesToTouchThem' {
-        Set-Content -Path (Join-Path $script:Root 'MEMORY.md') -Value 'owner is editing this right now'
+        Set-Content -Path (Join-Path $script:Root '.claude/agents/helper.md') -Value 'owner is editing this right now'
 
         $r = Invoke-EvolverCommit -Root $script:Root -ProposalDir (New-GoodProposal -Root $script:Root) -AnswerFile (New-Answers)
 
         $r.ExitCode | Should -Be 1
         $r.Output | Should -Match 'uncommitted'
-        Get-Content (Join-Path $script:Root 'MEMORY.md') -Raw | Should -Match 'owner is editing'
+        Get-Content (Join-Path $script:Root '.claude/agents/helper.md') -Raw | Should -Match 'owner is editing'
     }
 
     It 'Evolver_Always_RemovesItsWorktree' {

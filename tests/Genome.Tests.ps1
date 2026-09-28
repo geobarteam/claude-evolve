@@ -51,7 +51,7 @@ Describe 'Get-GenomeManifest' {
         $manifest = Get-GenomeManifest -RepoRoot $script:Root
 
         $manifest.Genome | Should -Contain 'CLAUDE.md'
-        $manifest.Genome | Should -Contain 'MEMORY.md'
+        $manifest.Genome | Should -Contain 'memory/long-term.md'
         $manifest.Protected | Should -Contain '.claude/settings.json'
         $manifest.Protected | Should -Contain 'evolution/evolve.json'
 

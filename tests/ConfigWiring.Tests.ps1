@@ -39,20 +39,20 @@ BeforeAll {
 
     function New-OneChangeProposal {
         param([string] $Root)
-        $memory = [System.IO.File]::ReadAllText((Join-Path $Root 'MEMORY.md')) + "`n- **Evolved belief** (since: gen/1). text`n"
-        New-Proposal -Dir (Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))) -Files @{ 'MEMORY.md' = $memory } -Note (New-Note -Summary 'add evolved belief' -Changes @(
-                @{ Title = 'Add evolved belief'; Files = @('MEMORY.md'); Why = 'evolution/journal/2026-09-20-0900.md: agent lacked it' }))
+        $memory = [System.IO.File]::ReadAllText((Join-Path $Root '.claude/agents/helper.md')) + "`n- **Evolved belief** (since: gen/1). text`n"
+        New-Proposal -Dir (Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))) -Files @{ '.claude/agents/helper.md' = $memory } -Note (New-Note -Summary 'add evolved belief' -Changes @(
+                @{ Title = 'Add evolved belief'; Files = @('.claude/agents/helper.md'); Why = 'evolution/journal/2026-09-20-0900.md: agent lacked it' }))
     }
 
     function New-ThreeChangeProposal {
         param([string] $Root)
-        $memory = [System.IO.File]::ReadAllText((Join-Path $Root 'MEMORY.md')) + "`n- **Evolved belief** (since: gen/1). text`n"
+        $memory = [System.IO.File]::ReadAllText((Join-Path $Root '.claude/agents/helper.md')) + "`n- **Evolved belief** (since: gen/1). text`n"
         New-Proposal -Dir (Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))) -Files @{
-            'MEMORY.md'                    = $memory
+            '.claude/agents/helper.md'                    = $memory
             'CLAUDE.md'                    = (Add-OutsideEdit -Root $Root)
             '.claude/skills/refit/SKILL.md' = "---`nname: refit`n---`nRefit skill, rewritten`n"
         } -Note (New-Note -Summary 'three changes' -Changes @(
-                @{ Title = 'Add belief'; Files = @('MEMORY.md'); Why = 'evolution/journal/2026-09-20-0900.md' },
+                @{ Title = 'Add belief'; Files = @('.claude/agents/helper.md'); Why = 'evolution/journal/2026-09-20-0900.md' },
                 @{ Title = 'Add instruction'; Files = @('CLAUDE.md'); Why = 'evolution/journal/2026-09-20-0900.md' },
                 @{ Title = 'Rewrite refit skill'; Files = @('.claude/skills/refit/SKILL.md'); Why = 'evolution/journal/2026-09-20-0900.md' }))
     }

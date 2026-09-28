@@ -1,6 +1,6 @@
 ---
 name: init
-description: "Initialise this project for the evolve plugin: protected owner constraints and working-agent duties in CLAUDE.md, MEMORY.md, the evolution/ tree with a generated gen-0 inventory, evolve.json, regression task skeletons and the .gitignore entries. Idempotent; commits and tags gen/0 only after the owner's explicit yes."
+description: "Initialise this project for the evolve plugin: protected owner constraints and working-agent duties in CLAUDE.md, short- and long-term memory under memory/, the evolution/ tree with a generated gen-0 inventory, evolve.json, regression task skeletons and the .gitignore entries. Idempotent; commits and tags gen/0 only after the owner's explicit yes."
 argument-hint: "(no arguments; the skill asks its questions in the chat)"
 ---
 # /evolve:init — set this project up for the self-evolving agent
@@ -36,7 +36,8 @@ current repository; the engine itself stays in the plugin. Follow the steps in o
 pwsh -NoProfile -File "${CLAUDE_PLUGIN_ROOT}/scripts/Initialize-Project.ps1" -ProjectRoot "$PWD" [-Constraints "<c1>", "<c2>"] [-ConstraintPlacement protected|duties] [-IncludeCi]
 ```
 
-Show its output verbatim: one `created` / `kept` line per artifact, any `warning:` lines (no `.claude/` folder,
+Show its output verbatim: one `created` / `kept` line per artifact (a project that still has a `MEMORY.md` from
+an older plugin version gets it migrated into `memory/long-term/`, one memory per bullet), any `warning:` lines (no `.claude/` folder,
 duplicate hooks in `.claude/settings.json`, a protected block that differs from the plugin template), and the
 closing line `initialised N artifact(s)` or `already initialised; nothing changed`.
 
@@ -46,7 +47,7 @@ Ask: "Shall I commit these files as the baseline and tag it `gen/0`?" Only after
 with the owner's own git identity:
 
 ```powershell
-git add CLAUDE.md MEMORY.md evolution .gitignore
+git add CLAUDE.md memory evolution .gitignore
 git commit -m "chore(evolve): initialise the self-evolving agent (gen/0)"
 git tag gen/0
 ```
